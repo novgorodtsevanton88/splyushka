@@ -358,6 +358,8 @@ label.btn{ display:inline-flex; align-items:center; cursor:pointer; }
 html.dark .acard{ background:color-mix(in srgb,var(--abg) 26%,var(--surface)); color:var(--text); }
 .art{ width:100%; max-width:96px; aspect-ratio:1; }
 .art svg, .art img{ width:100%; height:100%; display:block; object-fit:cover; border-radius:20px; }
+.art img.pic{ object-fit:contain; border-radius:0; -webkit-user-drag:none; user-select:none; }
+.stage-art img.pic{ filter:drop-shadow(0 14px 18px rgba(60,40,110,.18)); }
 #stage{ position:fixed; inset:0; z-index:45; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 24px); background:color-mix(in srgb,var(--abg) 70%,var(--bg)); opacity:0; transition:opacity .3s; }
 html.dark #stage{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 #stage.show{ opacity:1; }
@@ -613,6 +615,12 @@ html.dark .owl svg{ filter:drop-shadow(0 8px 12px rgba(0,0,0,.4)); }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{ animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; }
 }
+
+/* perf: cards inside the swiping pages don't re-blur the backdrop every frame (that made tab switches stutter) */
+.view .glass, .view .hero-chip{ -webkit-backdrop-filter:none; backdrop-filter:none; }
+.view .glass{ background:linear-gradient(180deg, var(--hl-soft), transparent 40%), color-mix(in srgb, var(--glass) 78%, var(--surface)); }
+.view{ contain:layout paint; }
+html.paging .blob, html.paging .sky .st{ animation-play-state:paused; }
 </style>
 </head>
 <body>
@@ -1632,7 +1640,9 @@ const ANIMAL_SVG = {
 };
 const isImgData = v => typeof v === "string" && /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/.test(v);
 const isClip = v => v && typeof v.data === "string" && /^[A-Za-z0-9+/=]+$/.test(v.data);
-function animalArt(id) { const c = state.animals.img[id]; return c && isImgData(c.data) ? `<img src="${esc(c.data)}" alt="">` : ANIMAL_SVG[id]; }
+/* illustrated animal faces: img/animals/<id>.webp (384px, transparent) */
+const ANIMAL_PIC_IDS = new Set(["cow", "dog", "cat", "pig", "hen", "rooster", "horse", "sheep", "duck", "goat", "frog", "bird"]);
+function animalArt(id) { const c = state.animals.img[id]; if (c && isImgData(c.data)) return `<img src="${esc(c.data)}" alt="">`; return ANIMAL_PIC_IDS.has(id) ? `<img class="pic" src="img/animals/${id}.webp" alt="" decoding="async" draggable="false">` : ANIMAL_SVG[id]; }
 
 function renderDev() {
   const mods = [["🔎", "Хто це?", "Вгадай за звуком"], ["🚂", "Транспорт", "Бі-бі, чух-чух"], ["🥁", "Інструменти", "Барабан, дудочка"], ["🎨", "Кольори й форми", "Перші поняття"]];
@@ -1854,6 +1864,7 @@ const nearestIdx = (cs, x) => cs.reduce((best, c, k) => Math.abs(c - x) < Math.a
 /* pager: every view sits at (index − current) × 100% plus the finger offset */
 function layoutViews(dx = 0, anim = true) {
   const i = ORDER.indexOf(state.tab);
+  const R = document.documentElement; R.classList.add("paging"); clearTimeout(layoutViews.t); layoutViews.t = setTimeout(() => R.classList.remove("paging"), anim ? 480 : 1200);
   ORDER.forEach((id, k) => {
     const v = $("#view-" + id);
     v.style.transition = anim ? "" : "none";
@@ -2047,7 +2058,7 @@ function openProfile() {
       <div class="muted small">Щоб другий з батьків бачив і додавав записи, власник має запросити його в меню «Поділитися» цього застосунку з правом редагування. Потрібен акаунт Claude.</div></div>
 
     <div class="sec-title">Розвиток</div>
-    <button class="arow" type="button" data-act="animals"><span class="art">${ANIMAL_SVG.cow}</span><span style="flex:1"><b>Тваринки</b><span class="muted small">Картинки, звуки і голос для назв</span></span></button>
+    <button class="arow" type="button" data-act="animals"><span class="art">${animalArt("cow")}</span><span style="flex:1"><b>Тваринки</b><span class="muted small">Картинки, звуки і голос для назв</span></span></button>
 
     <div class="sec-title">Тема</div>
     <div class="seg" id="stTheme"><span class="pill"></span>${THEMES.map(([v, t]) => `<button data-v="${v}" class="${(isDark() ? "dark" : "light") === v ? "on" : ""}">${t}</button>`).join("")}</div>
@@ -2062,7 +2073,7 @@ function openProfile() {
     <div class="seg" id="stGlass"><span class="pill"></span>${GLASS.map(([v, t]) => `<button data-v="${v}" class="${settings.glass === v ? "on" : ""}">${t}</button>`).join("")}</div>
 
     <button type="button" class="signout" onclick="window.__signOut&&window.__signOut()">Вийти з акаунта</button>
-    <div class="disclaimer" style="margin-top:10px">Сплюшка · v0.8 · безкоштовно і без реклами</div>
+    <div class="disclaimer" style="margin-top:10px">Сплюшка · v0.8.1 · безкоштовно і без реклами</div>
   `, sh => {
     let gender = c.gender || "";
     initSeg($("#pfGender", sh), v => gender = v);

@@ -1,6 +1,6 @@
-// Сплюшка: офлайн-кеш. Версія: 1
-var C='sp-1';
-var CORE=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
+// Сплюшка: офлайн-кеш. Версія: 2
+var C='sp-2';
+var CORE=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'].concat(["cow", "dog", "cat", "pig", "hen", "rooster", "horse", "sheep", "duck", "goat", "frog", "bird"].map(function(a){return './img/animals/'+a+'.webp'}));
 var LIB='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 self.addEventListener('install',function(e){
  e.waitUntil(caches.open(C).then(function(c){return c.addAll(CORE).then(function(){return c.add(new Request(LIB,{mode:'cors'})).catch(function(){})})}).then(function(){return self.skipWaiting()}));
