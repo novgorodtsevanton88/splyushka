@@ -400,6 +400,11 @@ html.dark #stage{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 .media-box .mh{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-weight:800; }
 
 /* v0.9 · development: checklist, skills, animal modes */
+/* резервна копія */
+#bk-bar{ position:fixed; z-index:55; left:50%; transform:translate(-50%,20px); bottom:calc(env(safe-area-inset-bottom) + 100px); width:min(340px,calc(100% - 28px)); padding:12px 14px; border-radius:22px; display:none; flex-direction:column; gap:10px; opacity:0; transition:opacity .3s, transform .4s cubic-bezier(.22,.8,.24,1); }
+#bk-bar.show{ opacity:1; transform:translate(-50%,0); }
+#bk-bar .t{ font-weight:700; font-size:14px; line-height:1.35; }
+#bk-bar .r{ display:flex; gap:8px; justify-content:flex-end; }
 .hidden{ display:none !important; }
 .devday .card-head{ align-items:flex-start; }
 .dring{ --p:0; width:54px; height:54px; flex:none; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--accent) calc(var(--p) * 360deg), var(--accent-soft) 0); position:relative; }
@@ -714,6 +719,7 @@ html.paging .blob, html.paging .sky .st{ animation-play-state:paused; }
     <button class="tab" data-tab="dev" id="tab-dev"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="7.5" r="3.5"/><path d="M16.5 4l4 7h-8z"/><rect x="4" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14.5c-1.6-1.6-4.3.3-2.9 2.6l2.9 3.4 2.9-3.4c1.4-2.3-1.3-4.2-2.9-2.6z"/></svg><span>Розвиток</span></button>
   </nav>
 </div>
+<div id="bk-bar" class="glass" role="status"><div class="t" id="bk-t"></div><div class="r"><button class="btn sm ghost" type="button" id="bk-later">Пізніше</button><button class="btn sm" type="button" id="bk-go">Зберегти копію</button></div></div>
 <div id="sheet-root"></div>
 <div id="toast" class="glass" role="status" aria-live="polite"></div>
 
@@ -993,7 +999,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem("drimka." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem("drimka." + k, JSON.stringify(v)); } catch (e) { } }
 };
-const settings = Object.assign({ theme: "auto", palette: "lavender", font: "Nunito", tabAnim: "drop", keepAwake: false, tts: true, say: "both", animalMode: "listen" }, LS.get("settings", {}));
+const settings = Object.assign({ theme: "auto", palette: "lavender", font: "Nunito", tabAnim: "drop", keepAwake: false, tts: true, say: "both", animalMode: "listen", backupRemind: false, lastBackup: 0, backupSnooze: 0 }, LS.get("settings", {}));
 delete settings.night; delete settings.glass;
 const PALETTES = [["lavender", "Лаванда", "#a593f5"], ["mint", "Мʼята", "#5cc7a8"], ["peach", "Персик", "#f4a184"], ["sky", "Небо", "#72b1ea"], ["rose", "Троянда", "#ec93b6"]];
 const FONTS = ["Nunito", "Manrope", "Comfortaa", "Rubik", "Golos Text", "Montserrat Alternates"];
@@ -2856,8 +2862,16 @@ function openProfile() {
     <div class="sec-title">Шрифт</div>
     <div class="opt-list" id="stFont">${FONTS.map(f => `<button data-v="${f}" class="${settings.font === f ? "on" : ""}" style="font-family:'${f}'">${f}<br><span class="muted small">Добраніч, малюче</span></button>`).join("")}</div>
 
+    <div class="sec-title">Резервна копія</div>
+    <div class="group">
+      <div class="toggle-row"><span><b>Нагадувати раз на тиждень</b><br><span class="muted small">Якщо тиждень без копії, застосунок мʼяко запропонує її зберегти</span></span><button type="button" class="switch ${settings.backupRemind ? "on" : ""}" id="bkRemind" aria-label="Нагадувати про резервну копію"></button></div>
+      <div class="muted small" id="bkLast" style="margin-top:8px">${esc(bkLastText())}</div>
+      <div class="btn-row" style="margin-top:10px"><button class="btn sm" type="button" id="bkSave">Зберегти копію</button><label class="btn sm ghost" for="bkFile">Відновити з файлу</label><input class="vh" type="file" id="bkFile" accept="application/json,.json"></div>
+      <div class="muted small" style="margin-top:8px">Копія містить записи сну, профіль, слова, етапи й свої колискові (без самих аудіофайлів і картинок тваринок).</div>
+    </div>
+
     <button type="button" class="signout" onclick="window.__signOut&&window.__signOut()">Вийти з акаунта</button>
-    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.1 · безкоштовно і без реклами</div>
+    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.2 · безкоштовно і без реклами</div>
   `, sh => {
     let gender = c.gender || "";
     initSeg($("#pfGender", sh), v => gender = v);
@@ -2874,10 +2888,99 @@ function openProfile() {
     });
     const pd = $("#pfPhotoDel", sh); if (pd) pd.addEventListener("click", async () => { const o = Object.assign({}, state.child); delete o.photo; try { await store.setChild(o); toast("Фото прибрано"); openProfile(); } catch (e) { } });
     initSeg($("#stTheme", sh), v => switchTheme(v));
+    bkMount(sh);
     $$("#stPal .sw", sh).forEach(b => b.addEventListener("click", () => { settings.palette = b.dataset.v; $$("#stPal .sw", sh).forEach(x => x.classList.toggle("on", x === b)); $("#stPalName", sh).textContent = PALETTES.find(p => p[0] === b.dataset.v)[1]; saveSettings(); }));
     $$("#stFont button", sh).forEach(b => b.addEventListener("click", () => { settings.font = b.dataset.v; $$("#stFont button", sh).forEach(x => x.classList.toggle("on", x === b)); saveSettings(); setTimeout(() => { $$(".seg").forEach(s => { const on = s.querySelector(".on"), p = s.querySelector(".pill"); if (on && p) { p.style.left = on.offsetLeft + "px"; p.style.width = on.offsetWidth + "px"; } }); }, 250); }));
   });
 }
+
+/* ============ резервна копія ============ */
+const BK_WEEK = 7 * 24 * 3600 * 1000;
+const BK_COLS = [["zoo", "zoo", "setZoo"], ["devDay", "devDays", "setDevDay"], ["skills", "skills", "setSkill"], ["known", "known", "setKnown"], ["words", "words", "setWord"], ["miles", "miles", "setMile"], ["lulls", "lulls", "setLull"]];
+function bkLastText() {
+  if (!settings.lastBackup) return "Копію ще не зберігали.";
+  const d = new Date(settings.lastBackup), days = Math.floor((Date.now() - d) / 86400000);
+  return "Остання копія: " + d.toLocaleDateString("uk-UA", { day: "numeric", month: "long" }) + (days > 0 ? " (" + days + " дн. тому)" : " (сьогодні)");
+}
+async function bkCollect() {
+  let sleeps = state.sleeps;
+  if (store.mode === "db") { try { const sn = await store.db.collection("sleeps").get(); sleeps = sn.docs.map(d => Object.assign({ id: d.id }, d.data())); } catch (e) { } }
+  const out = { app: "splyushka", v: 1, at: new Date().toISOString(), child: state.child || null, sleeps: sleeps.map(x => Object.assign({}, x)) };
+  BK_COLS.forEach(([col, field]) => { out[col] = state[field] || {}; });
+  return out;
+}
+async function bkSave() {
+  let data;
+  try { data = await bkCollect(); } catch (e) { toast("Не вдалося зібрати дані"); return false; }
+  if (!data.child && !data.sleeps.length) { toast("Поки що немає що зберігати"); return false; }
+  const name = "splyushka-" + new Date().toISOString().slice(0, 10) + ".json";
+  const file = new File([JSON.stringify(data)], name, { type: "application/json" });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "Копія Сплюшки" });
+    } else {
+      const url = URL.createObjectURL(file), a = document.createElement("a");
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+  } catch (e) { if (e && e.name === "AbortError") return false; toast("Не вдалося зберегти файл"); return false; }
+  settings.lastBackup = Date.now(); settings.backupSnooze = 0; LS.set("settings", settings);
+  toast("Копію збережено"); bkHide();
+  const l = $("#bkLast"); if (l) l.textContent = bkLastText();
+  return true;
+}
+async function bkRestore(file) {
+  let d;
+  try { d = JSON.parse(await file.text()); } catch (e) { toast("Це не файл копії Сплюшки"); return; }
+  if (!d || d.app !== "splyushka" || !Array.isArray(d.sleeps)) { toast("Це не файл копії Сплюшки"); return; }
+  if (!confirm("Додати дані з копії? Наявні записи залишаться, відсутні буде відновлено.")) return;
+  toast("Відновлюю…");
+  try {
+    if (d.child && !state.child) await store.setChild(d.child);
+    const have = new Map(state.sleeps.map(x => [x.id, x]));
+    const list = d.sleeps.filter(x => x && x.id && (!have.has(x.id) || JSON.stringify(have.get(x.id)) !== JSON.stringify(x)));
+    if (store.mode === "db") {
+      for (let i = 0; i < list.length; i += 20) await Promise.all(list.slice(i, i + 20).map(x => { const { id, ...rest } = x; return store.db.doc("sleeps/" + id).set(rest); }));
+    } else if (list.length) {
+      list.forEach(x => { const k = state.sleeps.findIndex(y => y.id === x.id); if (k >= 0) state.sleeps[k] = x; else state.sleeps.push(x); });
+      state.sleeps.sort((a, b) => b.start - a.start); store.saveLocal();
+    }
+    let n = list.length;
+    for (const [col, field, fn] of BK_COLS) {
+      const src = d[col] || {}, cur = state[field] || {};
+      const ids = Object.keys(src).filter(id => JSON.stringify(cur[id]) !== JSON.stringify(src[id]));
+      for (let i = 0; i < ids.length; i += 20) await Promise.all(ids.slice(i, i + 20).map(id => store[fn](id, src[id])));
+      n += ids.length;
+    }
+    toast(n ? "Відновлено записів: " + n : "Усе вже на місці");
+  } catch (e) { toast("Не вдалося відновити частину даних"); }
+}
+function bkMount(sh) {
+  const sw = $("#bkRemind", sh);
+  sw.addEventListener("click", () => {
+    settings.backupRemind = !settings.backupRemind; sw.classList.toggle("on", settings.backupRemind);
+    if (settings.backupRemind && !settings.lastBackup) settings.lastBackup = Date.now(); // відлік тижня від увімкнення
+    settings.backupSnooze = 0; LS.set("settings", settings);
+    if (!settings.backupRemind) bkHide();
+  });
+  $("#bkSave", sh).addEventListener("click", () => { bkSave(); });
+  $("#bkFile", sh).addEventListener("change", e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) bkRestore(f); });
+}
+function bkHide() { const b = $("#bk-bar"); if (!b) return; b.classList.remove("show"); setTimeout(() => { if (!b.classList.contains("show")) b.style.display = "none"; }, 400); }
+function bkCheck() {
+  if (!settings.backupRemind || document.hidden || !state.loaded || !state.child) return;
+  const now = Date.now();
+  if (now - (settings.lastBackup || 0) < BK_WEEK || now < (settings.backupSnooze || 0)) return;
+  if ($("#sheet-root .sheet") || Together.end) return;
+  const b = $("#bk-bar"); if (b.classList.contains("show")) return;
+  const days = Math.floor((now - settings.lastBackup) / 86400000);
+  $("#bk-t").textContent = "Минуло " + days + " дн. без резервної копії. Збережіть її, щоб не втратити записи.";
+  b.style.display = "flex"; requestAnimationFrame(() => requestAnimationFrame(() => b.classList.add("show")));
+}
+$("#bk-go").addEventListener("click", () => { bkSave(); });
+$("#bk-later").addEventListener("click", () => { settings.backupSnooze = Date.now() + 24 * 3600 * 1000; LS.set("settings", settings); bkHide(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(bkCheck, 2500); });
+setInterval(bkCheck, 5 * 60 * 1000);
+setTimeout(bkCheck, 6000);
 
 /* ============ toast ============ */
 let toastT;
