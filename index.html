@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk" data-palette="lavender" data-glass="strong">
+<html lang="uk" data-palette="lavender">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
@@ -66,8 +66,6 @@ html[data-palette="peach"]{ --accent:#f4a184; --accent-soft:rgba(244,161,132,.2)
 html[data-palette="sky"]{ --accent:#72b1ea; --accent-soft:rgba(114,177,234,.2); --nap:#ffcd9d; --night:#8e90ea; --b1:#cde5ff; --b2:#e1d9ff; --b3:#d2f3ea; }
 html[data-palette="rose"]{ --accent:#ec93b6; --accent-soft:rgba(236,147,182,.2); --nap:#ffd2a0; --night:#9f9ce8; --b1:#ffd3e4; --b2:#e8dcff; --b3:#ffe8cd; }
 
-html[data-glass="soft"]{ --glass:rgba(255,255,255,.72); --blur:14px; --hl-soft:rgba(255,255,255,.16); --sheen:rgba(255,255,255,.05); --rim:rgba(255,255,255,.55); }
-html[data-glass="off"]{ --glass:rgba(255,255,255,.97); --blur:0px; --hl-soft:transparent; --sheen:transparent; --rim:transparent; }
 
 html.dark{
   --bg:#11111a; --text:#ecebf6; --text-2:#a3a0b9; --line:rgba(255,255,255,.08);
@@ -77,8 +75,6 @@ html.dark{
   --blob-op:.30; --ink:#191626;
   color-scheme: dark;
 }
-html.dark[data-glass="soft"]{ --glass:rgba(32,32,48,.78); --hl-soft:rgba(255,255,255,.05); --sheen:rgba(255,255,255,.03); --rim:rgba(255,255,255,.14); }
-html.dark[data-glass="off"]{ --glass:rgba(28,28,42,.98); --hl-soft:transparent; --sheen:transparent; --rim:transparent; }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body{ height:100%; margin:0; }
@@ -368,7 +364,8 @@ html.dark .stage-art img.pic{ filter:drop-shadow(0 6px 7px rgba(0,0,0,.35)); }
 html.dark #stage{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 #stage.show{ opacity:1; }
 .stage-close{ position:absolute; top:calc(env(safe-area-inset-top) + 14px); right:16px; }
-.stage-art{ width:min(64vw,270px); aspect-ratio:1; animation:pop .55s cubic-bezier(.3,1.6,.5,1); }
+.stage-art{ width:min(60vw,260px); aspect-ratio:1; }
+.stage-art.pop{ animation:pop .55s cubic-bezier(.3,1.6,.5,1); }
 .stage-art.talk{ animation:wiggle .5s ease-in-out infinite; }
 .stage-name{ font-size:38px; font-weight:800; letter-spacing:-.02em; text-align:center; }
 .stage-says{ font-size:24px; font-weight:800; color:var(--text-2); text-align:center; }
@@ -468,8 +465,6 @@ html.dark .qopt{ background:color-mix(in srgb,var(--abg) 26%,var(--surface)); co
 html[data-palette="lavender"]{ --b1:#dcd2ff; --b2:#ffe2f0; --b3:#e6defe; }
 html.dark{ --bg:#14121f; --text:#efeaff; --text-2:#a8a1c8; --glass:rgba(36,32,58,.72); --glass-strong:rgba(44,40,70,.92); --glass-border:rgba(255,255,255,.08);
   --cloud:#b9aef5; --cloud-op:.07; --star:#ffe08a; --tile:rgba(255,255,255,.05); --rim:rgba(255,255,255,.1); --hl-soft:rgba(255,255,255,.04); --sheen:rgba(255,255,255,.02); }
-html[data-glass="off"]{ --glass:rgba(255,255,255,.96); }
-html.dark[data-glass="off"]{ --glass:rgba(34,30,54,.98); }
 
 /* sky decorations */
 .sky{ position:absolute; inset:0; width:100%; height:100%; }
@@ -723,6 +718,61 @@ html.dark #auf input{background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.1
 #aum{min-height:20px;margin-top:12px;font-size:13px;font-weight:700;color:#d0566b}
 #aul{width:38px;height:38px;border-radius:50%;border:3px solid rgba(125,107,216,.2);border-top-color:#7d6bd8;animation:auspin .9s linear infinite}
 @keyframes auspin{to{transform:rotate(360deg)}}
+
+/* v1.0 */
+/* pager stage */
+#stage.pager{ display:block; padding:0; overflow:hidden; touch-action:pan-y; user-select:none; -webkit-user-select:none; background:var(--bg); }
+.st-track{ position:absolute; inset:0; will-change:transform; }
+.st-slide{ position:absolute; top:0; bottom:0; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:calc(env(safe-area-inset-top) + 64px) 28px 196px;
+  background:color-mix(in srgb,var(--abg) 70%,var(--bg)); }
+html.dark .st-slide{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
+.st-arrow{ position:absolute; z-index:3; top:38%; width:46px; height:46px; margin-top:-23px; }
+.st-arrow.l{ left:10px; } .st-arrow.r{ right:10px; }
+.st-arrow svg{ width:24px; height:24px; }
+.st-bar{ position:absolute; z-index:3; left:0; right:0; bottom:0; padding:0 16px calc(env(safe-area-inset-bottom) + 22px); display:flex; flex-direction:column; align-items:center; gap:10px; }
+.st-row{ display:flex; gap:10px; justify-content:center; width:100%; }
+.st-row .pill-btn{ height:54px; padding:0 22px; }
+.knbtn{ height:46px; padding:0 16px; border-radius:999px; display:inline-flex; align-items:center; gap:7px; font-weight:800; font-size:14px; color:var(--text); border:2px solid transparent; transition:background .25s, border-color .25s, transform .15s; }
+.knbtn i{ font-style:normal; font-size:16px; }
+.knbtn:active{ transform:scale(.96); }
+.knbtn.on{ background:color-mix(in srgb,var(--accent) 38%,var(--glass-strong)); border-color:var(--accent); }
+.acard{ position:relative; }
+.kb{ position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:12px; font-weight:800; background:rgba(255,255,255,.85); color:#2b2433; box-shadow:0 2px 6px rgba(0,0,0,.12); }
+.kb.ok{ background:#5cc98f; color:#fff; }
+.kn-sum{ margin:12px 2px 0; }
+/* play together */
+.tg-box{ margin-top:12px; padding:12px; border-radius:20px; background:var(--line); }
+.tg-box.on{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-weight:700; font-size:14px; background:color-mix(in srgb,var(--accent) 22%,transparent); }
+.tg-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.tg-seg{ width:132px; flex:none; }
+#tg-chip{ position:fixed; z-index:60; top:calc(env(safe-area-inset-top) + 12px); left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; padding:6px 8px 6px 14px; border-radius:999px; font-weight:800; font-size:15px; }
+#tg-chip button{ width:28px; height:28px; border-radius:50%; background:var(--line); display:grid; place-items:center; }
+#tg-chip button svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; }
+#tg-end{ position:fixed; inset:0; z-index:80; display:grid; place-items:center; padding:24px; background:color-mix(in srgb,var(--bg) 82%,transparent); opacity:0; transition:opacity .35s; }
+#tg-end.show{ opacity:1; }
+.tg-card{ max-width:340px; text-align:center; padding:26px 22px; border-radius:30px; display:flex; flex-direction:column; gap:8px; align-items:center; }
+.tg-card h2{ margin:0; font-size:22px; } .tg-card p{ margin:0; }
+.tg-owl{ width:110px; height:110px; } .tg-owl svg{ width:100%; height:100%; }
+/* words, milestones, speech */
+.wrow{ display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:18px; background:var(--tile, var(--line)); }
+.wrow .wk{ font-size:20px; width:28px; text-align:center; flex:none; }
+.wrow .txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; text-align:left; }
+.wrow .txt b{ font-size:15px; font-weight:800; overflow-wrap:anywhere; }
+.wplus{ min-width:44px; height:36px; border-radius:999px; font-weight:800; font-size:14px; background:var(--accent); color:var(--ink); flex:none; }
+.wplus:active{ transform:scale(.94); }
+.wdel{ width:32px; height:32px; border-radius:50%; display:grid; place-items:center; color:var(--text-2); background:var(--line); flex:none; }
+.wdel svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
+#wBody, #mlBody{ display:flex; flex-direction:column; gap:8px; }
+.tips-list{ display:flex; flex-direction:column; gap:8px; }
+.tipr{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:16px; background:var(--tile, var(--line)); font-size:14px; line-height:1.4; font-weight:600; }
+.tipr i{ font-style:normal; flex:none; }
+.wk-row{ grid-template-columns:62px 1fr 52px; }
+.wk-row .dl{ display:flex; align-items:center; gap:3px; white-space:nowrap; }
+.wk-row .mk{ font-size:12px; line-height:1; cursor:pointer; padding:2px 0; }
+.wk-row.has-mk .tl{ box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 70%,transparent); }
+.mk-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.mk-list .chip{ font-size:12px; padding:4px 10px; }
+.card-head .btn.sm{ white-space:nowrap; flex:none; }
 </style>
 <div id="au"><form id="auf" class="h" autocomplete="on"><div class="ic" aria-hidden="true"></div><div class="t">Сплюшка</div><div class="s">Увійдіть у свій акаунт</div>
 <input id="aue" type="email" autocomplete="username" inputmode="email" placeholder="Пошта" aria-label="Пошта" autocapitalize="off">
@@ -927,20 +977,18 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem("drimka." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem("drimka." + k, JSON.stringify(v)); } catch (e) { } }
 };
-const settings = Object.assign({ theme: "auto", palette: "lavender", font: "Nunito", tabAnim: "drop", glass: "strong", keepAwake: false, tts: true, say: "both", animalMode: "listen" }, LS.get("settings", {}));
-delete settings.night;
+const settings = Object.assign({ theme: "auto", palette: "lavender", font: "Nunito", tabAnim: "drop", keepAwake: false, tts: true, say: "both", animalMode: "listen" }, LS.get("settings", {}));
+delete settings.night; delete settings.glass;
 const PALETTES = [["lavender", "Лаванда", "#a593f5"], ["mint", "Мʼята", "#5cc7a8"], ["peach", "Персик", "#f4a184"], ["sky", "Небо", "#72b1ea"], ["rose", "Троянда", "#ec93b6"]];
 const FONTS = ["Nunito", "Manrope", "Comfortaa", "Rubik", "Golos Text", "Montserrat Alternates"];
-const GLASS = [["strong", "Сильне скло"], ["soft", "Мʼяке скло"], ["off", "Без скла"]];
-const THEMES = [["light", "Світла"], ["dark", "Темна"]];
+const THEMES = [["light", "Світла"], ["dark", "Темна"], ["auto", "Авто"]];
+const autoDark = (d = new Date()) => { const h = d.getHours(); return h >= 20 || h < 8; };
 const mq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
 function applySettings() {
   const root = document.documentElement;
-  const host = root.getAttribute("data-theme");
-  const dark = settings.theme === "dark" || (settings.theme === "auto" && (host ? host === "dark" : !!(mq && mq.matches)));
+  const dark = settings.theme === "dark" || (settings.theme !== "light" && autoDark());
   root.classList.toggle("dark", dark);
   root.dataset.palette = settings.palette;
-  root.dataset.glass = settings.glass;
   root.style.setProperty("--font", `"${settings.font}"`);
   requestAnimationFrame(() => moveIndicator(false));
 }
@@ -969,13 +1017,14 @@ function switchTheme(mode) {
 }
 function refreshThemeUI() {
   $$('[data-act="theme"]').forEach(b => b.innerHTML = isDark() ? ICON.sun : ICON.moon);
-  const seg = $("#stTheme"); if (seg) { const cur = isDark() ? "dark" : "light"; seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cur)); const on = seg.querySelector(".on"), p = seg.querySelector(".pill"); if (on && p) { p.style.left = on.offsetLeft + "px"; p.style.width = on.offsetWidth + "px"; } }
+  const seg = $("#stTheme"); if (seg) { const cur = settings.theme === "dark" || settings.theme === "light" ? settings.theme : "auto"; seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cur)); const on = seg.querySelector(".on"), p = seg.querySelector(".pill"); if (on && p) { p.style.left = on.offsetLeft + "px"; p.style.width = on.offsetWidth + "px"; } }
 }
-mq && mq.addEventListener && mq.addEventListener("change", applySettings);
+function autoThemeCheck() { if (settings.theme !== "light" && settings.theme !== "dark" && isDark() !== autoDark()) switchTheme("auto"); }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) autoThemeCheck(); });
 new MutationObserver(m => { if (m.some(x => x.attributeName === "data-theme")) applySettings(); }).observe(document.documentElement, { attributes: true });
 
 /* ============ state & store ============ */
-const state = { tab: "home", sleepSeg: "log", child: null, sleeps: [], loaded: false, sync: "init", canWrite: true, animals: { img: {}, snd: {}, voice: {} }, zoo: {}, devDays: {}, skills: {} };
+const state = { tab: "home", sleepSeg: "log", child: null, sleeps: [], loaded: false, sync: "init", canWrite: true, animals: { img: {}, snd: {}, voice: {} }, zoo: {}, devDays: {}, skills: {}, known: {}, words: {}, miles: {} };
 
 const store = {
   mode: "local", db: null,
@@ -1039,9 +1088,12 @@ const store = {
       this.db.collection("zoo").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.zoo = o; onAnimalsChanged(); }, e => console.warn("zoo", e && e.code));
       this.db.collection("devDay").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.devDays = o; renderDev(); }, e => console.warn("devDay", e && e.code));
       this.db.collection("skills").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.skills = o; renderDev(); fillSkills(); }, e => console.warn("skills", e && e.code));
+      this.db.collection("known").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.known = o; renderDev(); stageKnownRefresh(); }, e => console.warn("known", e && e.code));
+      this.db.collection("words").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.words = o; renderDev(); fillWords(); refreshChart(); }, e => console.warn("words", e && e.code));
+      this.db.collection("miles").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.miles = o; fillMiles(); refreshChart(); }, e => console.warn("miles", e && e.code));
     } else {
       state.animals = Object.assign({ img: {}, snd: {}, voice: {} }, LS.get("local.animals", {}));
-      state.zoo = LS.get("local.zoo", {}); state.devDays = LS.get("local.devDays", {}); state.skills = LS.get("local.skills", {});
+      state.zoo = LS.get("local.zoo", {}); state.devDays = LS.get("local.devDays", {}); state.skills = LS.get("local.skills", {}); state.known = LS.get("local.known", {}); state.words = LS.get("local.words", {}); state.miles = LS.get("local.miles", {});
     }
   },
   async putDoc(col, id, data, localKey, field, after) {
@@ -1050,6 +1102,9 @@ const store = {
   },
   setZoo(id, data) { return this.putDoc("zoo", id, data, "local.zoo", "zoo", onAnimalsChanged); },
   setDevDay(key, data) { return this.putDoc("devDay", key, data, "local.devDays", "devDays", renderDev); },
+  setKnown(id, data) { return this.putDoc("known", id, data, "local.known", "known", () => { renderDev(); stageKnownRefresh(); }); },
+  setWord(id, data) { return this.putDoc("words", id, data, "local.words", "words", () => { renderDev(); fillWords(); refreshChart(); }); },
+  setMile(id, data) { return this.putDoc("miles", id, data, "local.miles", "miles", () => { fillMiles(); refreshChart(); }); },
   setSkill(id, data) { return this.putDoc("skills", id, data, "local.skills", "skills", () => { renderDev(); fillSkills(); }); },
   async setAnimal(kind, id, data) {
     const col = { img: "animalImg", snd: "animalSnd", voice: "animalVoice" }[kind];
@@ -1469,20 +1524,22 @@ function renderSleep() {
 function logHtml() {
   if (!state.loaded) return `<div class="card glass loading"><div class="spinner"></div><div class="muted">Завантаження…</div></div>`;
   const now = Date.now(), today = startOfDay(now);
-  const rows = [];
+  const rows = [], MK = milesByDay(), seenMk = [];
   for (let i = 6; i >= 0; i--) {
-    const from = today - i * DAY, to = from + DAY;
+    const from = today - i * DAY, to = from + DAY, mks = MK[dayKey(from)] || [];
+    mks.forEach(m => seenMk.push(m));
     const tot = state.sleeps.filter(s => (s.end || now) > from && s.start < to).reduce((a, s) => a + (Math.min(s.end || now, to) - Math.max(s.start, from)), 0);
     const d = new Date(from);
-    rows.push(`<div class="wk-row"><span>${DOW[d.getDay()]} ${d.getDate()}</span><div class="tl">${segmentsFor(from, to, now)}</div><span class="tot num">${tot ? Math.floor(Math.round(tot / MIN) / 60) + ":" + pad(Math.round(tot / MIN) % 60) : "—"}</span></div>`);
+    rows.push(`<div class="wk-row ${mks.length ? "has-mk" : ""}"><span class="dl">${DOW[d.getDay()]} ${d.getDate()}${mks.length ? `<b class="mk" data-mk="${dayKey(from)}">${mks.slice(0, 2).map(m => m.e).join("")}</b>` : ""}</span><div class="tl">${segmentsFor(from, to, now)}</div><span class="tot num">${tot ? Math.floor(Math.round(tot / MIN) / 60) + ":" + pad(Math.round(tot / MIN) % 60) : "—"}</span></div>`);
   }
   const A = analyze();
   const avgDay = A.recent.length ? mean(A.recent.map(d => d.naps.reduce((a, n) => a + n.len, 0))) : null;
   const avgNight = A.recent.length ? mean(A.recent.filter(d => d.night).map(d => (d.night.end - d.night.start) / MIN)) : null;
   const avgNaps = A.recent.length ? mean(A.recent.map(d => d.naps.length)) : null;
-  const week = `<div class="card glass"><div class="card-head"><h2>Тиждень</h2><button class="btn sm" data-act="add">+ Додати сон</button></div>
+  const week = `<div class="card glass"><div class="card-head"><h2>Тиждень</h2><div class="btn-row" style="flex-wrap:nowrap"><button class="btn sm ghost" data-act="mile">★ Подія</button><button class="btn sm" data-act="add">+ Сон</button></div></div>
     <div class="week">${rows.join("")}</div>
     <div class="legend"><span><i style="background:var(--nap)"></i>денний</span><span><i style="background:var(--night)"></i>нічний</span></div>
+    ${seenMk.length ? `<div class="mk-list">${seenMk.map(m => `<span class="chip">${m.e} ${esc(m.label)} · ${fmtDayKey(m.d)}</span>`).join("")}</div>` : ""}
     <div class="stats"><div class="stat"><b class="num">${avgDay != null ? fmtDur(avgDay * MIN) : "—"}</b><span>вдень, сер.</span></div><div class="stat"><b class="num">${avgNight ? fmtDur(avgNight * MIN) : "—"}</b><span>ніч, сер.</span></div><div class="stat"><b class="num">${avgNaps != null ? avgNaps.toFixed(1).replace(".", ",") : "—"}</b><span>снів на день</span></div></div>
   </div>`;
   if (!state.sleeps.length) return week + `<div class="card glass" style="text-align:center"><h2>Записів ще немає</h2><p class="muted">Почніть із кнопки на головній або додайте сон вручну.</p></div>`;
@@ -1905,23 +1962,30 @@ const SAY_OPTS = [["both", "Назва і звук"], ["sound", "Лише зву
 const SAY_HINT = { both: "Спершу прозвучить назва, потім голос тваринки.", sound: "Одразу звучить голос тваринки, без назви.", none: "Нічого не звучить саме. Скажіть малюкові, як каже тваринка, а потім натисніть «Звук»." };
 const MODE_OPTS = [["listen", "Слухати"], ["2", "1 з 2"], ["3", "1 з 3"]];
 const MODE_HINT = { listen: "Торкніться тваринки, щоб послухати.", "2": "Звучить голос, малюк обирає одну з двох тваринок. Легкий рівень.", "3": "Звучить голос, малюк обирає одну з трьох. Трохи складніше." };
+function knownBadge(id) { const v = knownVal("a", id); return v === "knows" ? `<i class="kb ok" title="Знає">✓</i>` : v === "learns" ? `<i class="kb" title="Ще не знає">🌱</i>` : ""; }
+function knownSummary(list) { const n = list.filter(a => knownVal("a", a.id) === "knows").length, l = list.filter(a => knownVal("a", a.id) === "learns").length; return n || l ? `Знає ${n} з ${list.length}${l ? ` · ще вчимо ${l}` : ""}. Позначайте на картці тваринки.` : "На картці тваринки можна позначити «Знає» чи «Ще не знає»."; }
 function renderDev() {
   const mods = [["🔎", "Хто це?", "Вгадай за звуком"], ["🚂", "Транспорт", "Бі-бі, чух-чух"], ["🥁", "Інструменти", "Барабан, дудочка"], ["🎨", "Кольори й форми", "Перші поняття"]];
   const v = $("#view-dev"), sc = v.scrollTop, mode = settings.animalMode || "listen", list = zooList(), ageM = childAgeMonths();
   v.innerHTML = `<div class="wrap">${topBar("Розвиток", "Ігри та заняття для малюка")}
     ${devCard()}
     ${skillsCard()}
+    ${wordsCard()}
+    ${speechCard()}
     <div class="card glass">
       <div class="card-head"><h2>Як каже тваринка?</h2><button class="btn sm ghost" data-act="animals">Налаштувати</button></div>
+      ${togetherCard()}
+      <div class="kn-sum muted small">${knownSummary(list)}</div>
       <div class="seg" id="anMode"><span class="pill"></span>${MODE_OPTS.map(([k, t]) => `<button data-v="${k}" class="${mode === k ? "on" : ""}">${t}</button>`).join("")}</div>
       <p class="muted small" id="anModeHint" style="margin:10px 2px 0">${MODE_HINT[mode]}</p>
       <button class="btn quiz-go ${mode === "listen" ? "hidden" : ""}" id="quizGo" data-act="quiz">▶ Грати: хто так каже?</button>
-      <div class="agrid">${list.map(a => `<button class="acard" style="--abg:${a.bg}" data-animal="${a.id}"><span class="art">${animalArt(a.id)}</span>${esc(a.n)}</button>`).join("")}</div>
+      <div class="agrid">${list.map(a => `<button class="acard" style="--abg:${a.bg}" data-animal="${a.id}">${knownBadge(a.id)}<span class="art">${animalArt(a.id)}</span>${esc(a.n)}</button>`).join("")}</div>
       ${ageM != null && ageM < 18 ? `<p class="muted small" style="margin:12px 2px 0">До півтора року лікарі радять екран лише разом із дорослим і ненадовго: кілька хвилин гри, а далі повторюйте звуки без телефона.</p>` : ""}
     </div>
     <div class="dev-grid">${mods.map(([e, t, s]) => `<button class="dev-card glass" data-act="soon"><span class="soon">скоро</span><span class="em">${e}</span><span><b>${t}</b><br><span class="muted small">${s}</span></span></button>`).join("")}</div>
   </div>`;
   v.scrollTop = sc;
+  const tgs = $("#tgSeg", v); if (tgs) initSeg(tgs, k => { settings.playMin = +k; LS.set("settings", settings); });
   const seg = $("#anMode", v);
   if (seg) initSeg(seg, k => { settings.animalMode = k; LS.set("settings", settings); const h = $("#anModeHint"); if (h) h.textContent = MODE_HINT[k]; const g = $("#quizGo"); if (g) g.classList.toggle("hidden", k === "listen"); });
 }
@@ -1931,6 +1995,236 @@ document.addEventListener("click", e => {
   const s = e.target.closest("#view-dev [data-skill]"); if (s) { skillToggle(s.dataset.skill); return; }
 });
 document.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && e.target.matches && e.target.matches("[data-chk],[data-skill]")) { e.preventDefault(); e.target.click(); } });
+
+/* ============ v1.0: words, milestones, speech tips, play-together, known animals ============ */
+const gv = (m, f, n) => { const g = state.child && state.child.gender; return g === "m" ? m : g === "f" ? f : (n == null ? m : n); };
+const todayKey = () => dayKey();
+const fmtDayKey = k => { const d = parseDate(k); return d ? fmtDay(d.getTime()) : ""; };
+const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const refreshChart = () => { if (state.sleepSeg === "log") renderSleep(); };
+
+/* ---- milestones on the sleep chart ---- */
+function milePresets() {
+  return [["teeth", "🦷", "Зуби"], ["walk", "🚶", gv("Почав ходити", "Почала ходити", "Перші кроки")], ["words", "💬", "Перші слова"],
+  ["crawl", "🐾", gv("Почав повзати", "Почала повзати", "Повзання")], ["sit", "🪑", gv("Почав сидіти", "Почала сидіти", "Сидіння")],
+  ["roll", "🔄", gv("Перевернувся", "Перевернулась", "Перевертання")], ["other", "⭐", "Своя подія"]];
+}
+function milesAll() {
+  const P = milePresets(), out = [];
+  Object.keys(state.miles || {}).forEach(id => { const m = state.miles[id]; if (!m || !m.d) return; const p = P.find(x => x[0] === m.k) || P[P.length - 1]; out.push({ id, k: m.k, e: p[1], label: m.k === "other" ? (m.t || "Подія") : p[2], d: m.d }); });
+  if (!out.some(m => m.k === "words")) {
+    const ws = Object.values(state.words || {}).filter(w => w && w.k === "word" && w.d).map(w => w.d).sort();
+    if (ws.length) out.push({ id: "_fw", k: "words", e: "💬", label: "Перші слова", d: ws[0], derived: true });
+  }
+  return out.sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : 0);
+}
+function openMile() {
+  const P = milePresets(); let kind = "teeth";
+  openSheet(`${sheetHead("Подія на графіку")}
+    <p class="muted small" style="margin:-6px 0 12px">Позначка з’явиться біля потрібного дня на графіку сну. Так видно, як зуби, перші кроки чи слова впливають на сон.</p>
+    <div class="chips" id="mlKinds">${P.map(([k, e, t]) => `<button type="button" data-k="${k}" class="${k === kind ? "on" : ""}">${e} ${esc(t)}</button>`).join("")}</div>
+    <div class="field" id="mlTextF" style="margin-top:12px;display:none"><label for="mlText">Назва події</label><input class="input" id="mlText" maxlength="30" placeholder="Наприклад, переїзд"></div>
+    <div class="field" style="margin-top:12px"><label for="mlDate">Дата</label><input class="input" type="date" id="mlDate" value="${todayKey()}" max="${todayKey()}"></div>
+    <button class="btn" id="mlSave" style="width:100%;margin-top:14px">Додати на графік</button>
+    <div class="sec-title">Усі позначки</div><div id="mlBody"></div>`, sh => {
+    $$("#mlKinds button", sh).forEach(b => b.addEventListener("click", () => { kind = b.dataset.k; $$("#mlKinds button", sh).forEach(x => x.classList.toggle("on", x === b)); $("#mlTextF", sh).style.display = kind === "other" ? "" : "none"; }));
+    $("#mlSave", sh).addEventListener("click", async () => {
+      if (!state.canWrite) { toast("Немає права змінювати записи."); return; }
+      const d = $("#mlDate", sh).value, t = $("#mlText", sh).value.trim();
+      if (!d) { toast("Оберіть дату"); return; }
+      if (kind === "other" && !t) { toast("Напишіть назву події"); return; }
+      const doc = { k: kind, d }; if (kind === "other") doc.t = t;
+      try { await store.setMile(rid(), doc); toast("Додано на графік"); if (kind === "other") $("#mlText", sh).value = ""; } catch (e) { }
+    });
+    sh.addEventListener("click", async e => {
+      const del = e.target.closest("[data-mdel]"); if (!del) return;
+      const id = del.dataset.mdel, old = state.miles[id]; if (!old) return;
+      try { await store.setMile(id, null); toast("Позначку видалено", "Скасувати", () => store.setMile(id, old)); } catch (er) { }
+    });
+    fillMiles();
+  });
+}
+function fillMiles() {
+  const b = $("#mlBody"); if (!b) return; const all = milesAll().slice().reverse();
+  b.innerHTML = all.length ? all.map(m => `<div class="wrow"><span class="wk">${m.e}</span><span class="txt"><b>${esc(m.label)}</b><span class="muted small">${fmtDayKey(m.d)}${m.derived ? " · з розділу «Слова малюка»" : ""}</span></span>${m.derived ? "" : `<button class="wdel" data-mdel="${m.id}" aria-label="Видалити">${ICON.close}</button>`}</div>`).join("") : `<div class="muted small">Поки що позначок немає.</div>`;
+}
+function milesByDay() { const o = {}; milesAll().forEach(m => (o[m.d] = o[m.d] || []).push(m)); return o; }
+
+/* ---- baby's words ---- */
+const wordWord = n => `${n} ${plural(n, "раз", "рази", "разів")}`;
+function wordsSorted() { return Object.keys(state.words || {}).map(id => Object.assign({ id }, state.words[id])).filter(w => w.w).sort((a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : (b.at || 0) - (a.at || 0))); }
+function wordRow(w, full) {
+  return `<div class="wrow"><span class="wk">${w.k === "sound" ? "🔈" : "💬"}</span><span class="txt"><b>${esc(w.w)}</b><span class="muted small">вперше ${fmtDayKey(w.d)} · ${wordWord(w.n || 1)}</span></span><button class="wplus" data-wplus="${w.id}" aria-label="Ще раз сказав">+1</button>${full ? `<button class="wdel" data-wdel="${w.id}" aria-label="Видалити">${ICON.close}</button>` : ""}</div>`;
+}
+function wordsCard() {
+  const ws = wordsSorted(), nW = ws.filter(w => w.k !== "sound").length, nS = ws.length - nW, tot = ws.reduce((a, w) => a + (w.n || 1), 0);
+  return `<div class="card glass">
+    <div class="card-head"><h2>Слова малюка</h2><button class="btn sm" data-act="word-add">＋ Додати</button></div>
+    ${ws.length ? `<div class="stats"><div class="stat"><b class="num">${nW}</b><span>${plural(nW, "слово", "слова", "слів")}</span></div><div class="stat"><b class="num">${nS}</b><span>${plural(nS, "звук", "звуки", "звуків")}</span></div><div class="stat"><b class="num">${tot}</b><span>разів усього</span></div></div>
+    <div class="checks" style="margin-top:12px">${ws.slice(0, 4).map(w => wordRow(w, false)).join("")}</div>
+    ${ws.length > 4 ? `<button class="btn sm ghost" data-act="words" style="margin-top:10px">Усі ${ws.length}</button>` : `<button class="btn sm ghost" data-act="words" style="margin-top:10px">Відкрити список</button>`}`
+      : `<p class="muted small" style="margin:0">Записуйте перші слова й звуки з датою: «мама», «ав-ав», «дай». Кнопка +1 рахує, скільки разів малюк їх сказав.</p>`}
+  </div>`;
+}
+function openWords(focusAdd) {
+  let kind = "word";
+  openSheet(`${sheetHead("Слова малюка")}
+    <form id="wForm" class="form" style="margin-bottom:6px">
+      <div class="field"><label for="wIn">Слово або звук</label><input class="input" id="wIn" maxlength="30" autocomplete="off" placeholder="Наприклад, мама або ав-ав"></div>
+      <div class="seg" id="wKind"><span class="pill"></span><button type="button" data-v="word" class="on">Слово</button><button type="button" data-v="sound">Звук чи лепет</button></div>
+      <div class="field"><label for="wDate">Коли вперше</label><input class="input" type="date" id="wDate" value="${todayKey()}" max="${todayKey()}"></div>
+      <button class="btn" type="submit">Додати</button>
+    </form>
+    <div class="sec-title">Усі слова й звуки</div><div id="wBody" class="checks"></div>`, sh => {
+    initSeg($("#wKind", sh), v => kind = v);
+    $("#wForm", sh).addEventListener("submit", async e => {
+      e.preventDefault(); if (!state.canWrite) { toast("Немає права змінювати записи."); return; }
+      const w = $("#wIn", sh).value.trim(), d = $("#wDate", sh).value || todayKey(); if (!w) return;
+      const had = wordsSorted(), ex = had.find(x => x.w.toLowerCase() === w.toLowerCase());
+      try {
+        if (ex) { await store.setWord(ex.id, { w: ex.w, k: ex.k, d: ex.d, n: (ex.n || 1) + 1, at: Date.now() }); toast("Таке слово вже є: лічильник +1"); }
+        else { await store.setWord(rid(), { w, k: kind, d, n: 1, at: Date.now() }); toast(kind === "word" && !had.some(x => x.k !== "sound") ? "Перше слово! 🎉" : "Записали! 🌟"); }
+        $("#wIn", sh).value = "";
+      } catch (er) { }
+    });
+    sh.addEventListener("click", async e => {
+      const del = e.target.closest("[data-wdel]"); if (del) { const id = del.dataset.wdel, old = state.words[id]; if (!old) return; try { await store.setWord(id, null); toast("Видалено", "Скасувати", () => store.setWord(id, old)); } catch (er) { } return; }
+    });
+    fillWords(); if (focusAdd) setTimeout(() => { const i = $("#wIn", sh); i && i.focus(); }, 350);
+  });
+}
+function fillWords() { const b = $("#wBody"); if (!b) return; const ws = wordsSorted(); b.innerHTML = ws.length ? ws.map(w => wordRow(w, true)).join("") : `<div class="muted small">Поки що порожньо. Додайте перше слово.</div>`; }
+async function wordPlus(id) {
+  const w = state.words[id]; if (!w || !state.canWrite) return;
+  try { await store.setWord(id, Object.assign({}, w, { n: (w.n || 1) + 1, at: Date.now() })); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } } catch (e) { }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-wplus]"); if (b) { e.stopPropagation(); wordPlus(b.dataset.wplus); } });
+
+/* ---- speech tips by age ---- */
+const SPEECH = [
+  { m: [0, 6], t: "Перші «розмови»", tips: [
+    "Розповідайте, що робите, під час догляду: «зараз вдягнемо кофтинку». Ваш голос і є першим уроком мови.",
+    "Коли малюк гулить, відповідайте і робіть паузу. Так він привчається говорити по черзі.",
+    "Повторюйте його звуки («а-гу») і додавайте свої. Це перша гра-розмова.",
+    "Співайте колискові й потішки. Ритм та інтонація готують до мови.",
+    "Говоріть не поспішаючи, тепло, з виразною інтонацією і дивіться малюкові в очі.",
+    "Гортайте картонні книжки з великими яскравими картинками й називайте, що на них."],
+    ask: "Якщо малюк майже не реагує на голос чи звуки, розкажіть про це педіатру." },
+  { m: [6, 9], t: "Склади й перші звуки", tips: [
+    "Промовляйте склади «ба-ба», «ма-ма», «да-да» й чекайте, поки малюк повторить.",
+    "Називайте те, на що малюк дивиться чи тягнеться: «це м’ячик».",
+    "Ігри «ку-ку» й «ладусі» вчать очікувати і чергувати «ти, потім я».",
+    "Читайте щодня хоча б кілька хвилин, показуйте на картинки пальцем.",
+    "Говоріть правильно й ніжно: не копіюйте дитячу вимову, але й не виправляйте.",
+    "Імітуйте звуки тварин і машин: «му-у», «бі-бі». Малюкам це легко повторювати."],
+    ask: "Якщо до 9 місяців немає лепету чи малюк не повертається на голос, обговоріть це з педіатром." },
+  { m: [9, 12], t: "Жести й перші слова", tips: [
+    "Показуйте пальцем і називайте: жест плюс слово допомагають запам’ятати обидва.",
+    "Вчіть прості жести: «пока», «дай», «ще». Вони не заважають мові, а підтягують її.",
+    "Після запитання зробіть паузу й дайте малюкові відповісти звуком чи жестом.",
+    "Чітко повторюйте повсякденні слова: «пити», «ще», «мама», «дай».",
+    "Читайте ті самі книжки знову й знову: повтори допомагають зрозуміти слова.",
+    "Радійте кожній спробі «сказати», навіть якщо це лише лепет."],
+    ask: "Якщо до 12 місяців немає лепету («ба-ба») чи жестів (показує, махає), розкажіть про це педіатру." },
+  { m: [12, 18], t: "Слів дедалі більше", tips: [
+    "Додавайте слово до сказаного: малюк «машина», а ви «так, велика машина».",
+    "Пропонуйте вибір: «яблуко чи банан?» і чекайте відповіді.",
+    "Коментуйте дії: «ллємо воду», «шапку на голову».",
+    "Читайте разом і питайте: «де кіт?», «що це?». Дозволяйте показувати.",
+    "Не змушуйте повторювати («скажи…»). Краще просто самі назвіть слово.",
+    "Звуконаслідування («мяу», «ту-ту») теж мова. Підтримуйте його."],
+    ask: "Якщо до 18 місяців малюк не каже кількох слів і не показує пальцем на потрібне, поговоріть із педіатром." },
+  { m: [18, 24], t: "Від слів до фраз", tips: [
+    "Розширюйте сказане на одне слово: «пити» → «хочеш пити воду?».",
+    "Грайте з іграшками: годуйте ведмедика, вкладайте ляльку спати й промовляйте дії.",
+    "Ставте прості питання «що?», «де?», на які можна відповісти словом.",
+    "Співайте пісеньки з рухами та римовані потішки.",
+    "Екран не замінює живої розмови. Краще 10 хвилин розмов і книжки.",
+    "Хваліть спроби, не виправляйте різко: просто повторіть слово правильно."],
+    ask: "Якщо до 2 років немає двослівних фраз на кшталт «дай воду», зверніться до педіатра чи логопеда." },
+  { m: [24, 99], t: "Речення й історії", tips: [
+    "Ставте відкриті питання: «що ми бачили в парку?». Чекайте, не підказуйте.",
+    "Читайте історії й просіть переказати кілька слів чи показати на картинці.",
+    "Допомагайте називати почуття: «ти сердишся, бо хотів ще погратись».",
+    "Розповідайте про свій день і слухайте відповіді. Діалог вчить більше за монолог.",
+    "Не добудовуйте речення за малюка. Дайте час знайти слова самому.",
+    "Грайте в ігри на «я», «мій», «твій» і на прості «чому?»."],
+    ask: "Якщо близько 2,5 року слів значно менше за 50 або малюка важко зрозуміти, зверніться до логопеда." }
+];
+let speechPage = null;
+function speechCard() {
+  const m = devAge(), b = SPEECH.find(x => m >= x.m[0] && m < x.m[1]) || SPEECH[3];
+  if (speechPage == null) speechPage = Math.floor(Date.now() / DAY) % 2;
+  const tips = b.tips.slice(speechPage * 3, speechPage * 3 + 3);
+  return `<div class="card glass">
+    <div class="card-head"><h2>Мовлення: поради</h2><button class="btn sm ghost" data-act="speech-next">↻ Інші</button></div>
+    <div class="chip" style="margin-bottom:10px">${b.m[1] >= 99 ? "від 2 років" : `${b.m[0]}–${b.m[1]} міс`} · ${esc(b.t)}</div>
+    <div class="tips-list">${tips.map(t => `<div class="tipr"><i>💬</i><span>${esc(t)}</span></div>`).join("")}</div>
+    <p class="muted small" style="margin:10px 2px 0">${esc(b.ask)} Усі діти різні, це лише орієнтири.</p>
+  </div>`;
+}
+
+/* ---- known / not yet known (animals now, other sets later) ---- */
+const knownKey = (t, id) => t + "_" + id;
+const knownVal = (t, id) => { const k = (state.known || {})[knownKey(t, id)]; return k && k.v || ""; };
+async function knownSet(t, id, v) {
+  if (!state.canWrite) { toast("Немає права змінювати записи."); return; }
+  const nv = knownVal(t, id) === v ? "" : v;
+  try { await store.setKnown(knownKey(t, id), nv ? { v: nv, at: Date.now() } : null); } catch (e) { }
+}
+function stageKnownRefresh() {
+  const el = $("#stage.pager"); if (!el) return; const a = stageList[stageIdx]; if (!a) return;
+  const v = knownVal("a", a.id);
+  $$("[data-stage=knows]", el).forEach(b => b.classList.toggle("on", v === "knows"));
+  $$("[data-stage=learns]", el).forEach(b => b.classList.toggle("on", v === "learns"));
+}
+
+/* ---- play together: timer with auto-stop ---- */
+const Together = { end: 0, dur: 0 };
+const tgActive = () => Together.end > Date.now();
+function tgStart(min) {
+  Together.dur = min; Together.end = Date.now() + min * MIN; settings.playMin = min; LS.set("settings", settings);
+  const o = $("#tg-end"); if (o) o.remove();
+  tgChip(); renderDev(); toast(`Граємо разом ${min} хв. Далі гра сама зупиниться.`);
+}
+function tgStop(silent) {
+  Together.end = 0; const c = $("#tg-chip"); if (c) c.remove(); renderDev(); if (!silent) toast("Гру зупинено");
+}
+function tgChip() {
+  let c = $("#tg-chip");
+  if (!tgActive()) { if (c) c.remove(); return; }
+  if (!c) { c = document.createElement("div"); c.id = "tg-chip"; c.className = "glass"; c.innerHTML = `<span>⏱</span><b class="num" id="tgLeft"></b><button data-tg="stop" aria-label="Зупинити гру">${ICON.close}</button>`; document.body.appendChild(c); }
+  tgTick();
+}
+function tgTick() {
+  if (!Together.end) return;
+  const left = Together.end - Date.now();
+  if (left <= 0) { tgFinish(); return; }
+  const t = fmtClock(left); $$("#tgLeft, [data-tgleft]").forEach(x => x.textContent = t);
+}
+function tgFinish() {
+  Together.end = 0; const c = $("#tg-chip"); if (c) c.remove();
+  stopClip(); closeStage(true); closeSheet(true);
+  renderDev();
+  const o = document.createElement("div"); o.id = "tg-end";
+  o.innerHTML = `<div class="tg-card glass"><div class="tg-owl">${owlSvg(false)}</div><h2>Час гри закінчився</h2><p class="muted">Молодці! Тепер відкладіть телефон: повторіть звуки тваринок голосом, обійміться чи погуляйте.</p>
+    <div class="btn-row" style="justify-content:center;margin-top:6px"><button class="btn ghost" data-tg="done">Закінчити</button><button class="btn" data-tg="more">Ще 5 хв</button></div></div>`;
+  document.body.appendChild(o);
+  requestAnimationFrame(() => o.classList.add("show"));
+  o.addEventListener("click", e => { const b = e.target.closest("[data-tg]"); if (!b) return; o.remove(); if (b.dataset.tg === "more") tgStart(5); });
+  try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch (e) { }
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && Together.end) tgTick(); });
+function togetherCard() {
+  const m = settings.playMin === 10 ? 10 : 5;
+  if (tgActive()) return `<div class="tg-box on"><span>⏱ Граємо разом · залишилось <b class="num" data-tgleft>${fmtClock(Together.end - Date.now())}</b></span><button class="btn sm ghost" data-tg="stop">Зупинити</button></div>`;
+  return `<div class="tg-box"><div class="tg-top"><span><b>Граємо разом</b><br><span class="muted small">Таймер сам зупинить гру</span></span>
+    <div class="seg tg-seg" id="tgSeg"><span class="pill"></span><button data-v="5" class="${m === 5 ? "on" : ""}">5 хв</button><button data-v="10" class="${m === 10 ? "on" : ""}">10 хв</button></div></div>
+    <button class="btn" data-tg="start" style="width:100%;margin-top:10px">▶ Почати гру</button></div>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-tg]"); if (!b || b.closest("#tg-end")) return; if (b.dataset.tg === "start") tgStart(settings.playMin === 10 ? 10 : 5); else if (b.dataset.tg === "stop") tgStop(); });
+setInterval(() => { if (Together.end) tgTick(); }, 1000);
+
 
 /* ---------- media helpers ---------- */
 async function fileToImage(file, size, fmt) {
@@ -2024,7 +2318,7 @@ async function playSound(a) { if (isClip(state.animals.snd[a.id])) return playCl
 async function runSay(a, what) {
   stopClip(); const tok = Game.tok;
   Sound.ensure(); Sound.unlockHtml();
-  const art = $("#stage .stage-art"), note = $("#stageNote");
+  const art = $("#stage .st-slide.cur .stage-art") || $("#stage .stage-art"), note = $("#stageNote");
   try {
     art && art.classList.add("talk");
     if (what !== "sound") { await playName(a); if (tok !== Game.tok) return; }
@@ -2033,35 +2327,98 @@ async function runSay(a, what) {
   finally { if (tok === Game.tok && art) art.classList.remove("talk"); }
 }
 
-/* ---------- animal stage (listen) ---------- */
-let stageList = [], stageIdx = 0;
-function openStage(id) { stageList = zooList(); const i = stageList.findIndex(a => a.id === id); showStage(i < 0 ? 0 : i); }
-function showStage(i) {
-  closeStage(true);
-  if (!stageList.length) return;
-  stageIdx = (i + stageList.length) % stageList.length;
-  const a = stageList[stageIdx], say = settings.say || "both";
-  const hasS = isClip(state.animals.snd[a.id]);
-  const el = document.createElement("div"); el.id = "stage"; el.style.setProperty("--abg", a.bg);
-  el.innerHTML = `<button class="icon-btn glass stage-close" data-stage="close" aria-label="Закрити">${ICON.close}</button>
-    <button class="stage-art art" data-stage="again" aria-label="Ще раз" style="max-width:none">${animalArt(a.id)}</button>
-    <div class="stage-name">${esc(a.n)}</div>${a.s ? `<div class="stage-says">${esc(a.s)}</div>` : ""}
-    <div class="stage-note" id="stageNote">${say === "none" ? `Скажіть малюкові, як каже ${esc(a.n.toLowerCase())}, а потім натисніть «Звук».` : !hasS && a.custom ? "Свого звуку ще немає: телефон прочитає текст. Звук можна додати в налаштуваннях." : !hasS ? "Звук тваринки ще не додано. Його можна завантажити в налаштуваннях." : ""}</div>
-    <div class="stage-nav"><button class="icon-btn glass" data-stage="prev" aria-label="Попередня"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <button class="pill-btn glass" data-stage="name" aria-label="Назва"><svg viewBox="0 0 24 24"><path d="M5 18v-1a5 5 0 0 1 5-5h0a5 5 0 0 1 5 5v1M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 8a4 4 0 0 1 0 6M20.5 5.5a7.5 7.5 0 0 1 0 11"/></svg>Назва</button>
-    <button class="pill-btn glass" data-stage="sound" aria-label="Звук"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>Звук</button>
-    <button class="icon-btn glass" data-stage="next" aria-label="Наступна"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;
+/* ---------- animal stage (listen): pager with draggable slides ---------- */
+let stageList = [], stageIdx = 0, stageBusy = false;
+function openStage(id) {
+  closeStage(true); stageList = zooList(); if (!stageList.length) return;
+  const i = stageList.findIndex(a => a.id === id); stageIdx = i < 0 ? 0 : i; stageBusy = false;
+  const el = document.createElement("div"); el.id = "stage"; el.className = "pager";
+  const many = stageList.length > 1, say = settings.say || "both";
+  el.innerHTML = `<div class="st-track" id="stTrack"></div>
+    <button class="icon-btn glass stage-close" data-stage="close" aria-label="Закрити">${ICON.close}</button>
+    ${many ? `<button class="icon-btn glass st-arrow l" data-stage="prev" aria-label="Попередня"><svg viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
+    <button class="icon-btn glass st-arrow r" data-stage="next" aria-label="Наступна"><svg viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>` : ""}
+    <div class="st-bar">
+      <div class="st-row"><button class="pill-btn glass" data-stage="name" aria-label="Назва"><svg viewBox="0 0 24 24"><path d="M5 18v-1a5 5 0 0 1 5-5h0a5 5 0 0 1 5 5v1M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 8a4 4 0 0 1 0 6M20.5 5.5a7.5 7.5 0 0 1 0 11"/></svg>Назва</button>
+      <button class="pill-btn glass" data-stage="sound" aria-label="Звук"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>Звук</button></div>
+      <div class="st-row kn"><button class="knbtn glass" data-stage="knows"><i>✓</i>Знає</button><button class="knbtn glass" data-stage="learns"><i>🌱</i>Ще не знає</button></div>
+    </div>`;
   document.body.appendChild(el);
+  stageBuild(true); stageKnownRefresh();
   requestAnimationFrame(() => el.classList.add("show"));
   el.addEventListener("click", e => {
-    const b = e.target.closest("[data-stage]"); if (!b) return; const k = b.dataset.stage;
-    if (k === "close") closeStage(); else if (k === "prev") showStage(stageIdx - 1); else if (k === "next") showStage(stageIdx + 1);
+    if (stageDrag.moved) { stageDrag.moved = false; return; }
+    const b = e.target.closest("[data-stage]"); if (!b) return; const k = b.dataset.stage, a = stageList[stageIdx];
+    if (k === "close") closeStage(); else if (k === "prev") stageGo(-1); else if (k === "next") stageGo(1);
     else if (k === "name") runSay(a, "name"); else if (k === "sound") runSay(a, "sound");
+    else if (k === "knows") knownSet("a", a.id, "knows"); else if (k === "learns") knownSet("a", a.id, "learns");
     else runSay(a, (settings.say || "both") === "none" ? "sound" : settings.say || "both");
   });
-  let x0 = null; el.addEventListener("touchstart", e => x0 = e.touches[0].clientX, { passive: true });
-  el.addEventListener("touchend", e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) showStage(stageIdx + (dx < 0 ? 1 : -1)); });
-  if (say !== "none") runSay(a, say);
+  stageBindDrag(el);
+  if (say !== "none") runSay(stageList[stageIdx], say);
+}
+function stageSlide(a, cur, pop) {
+  const say = settings.say || "both", hasS = isClip(state.animals.snd[a.id]);
+  const note = say === "none" ? `Скажіть малюкові, як каже ${esc(a.n.toLowerCase())}, а потім натисніть «Звук».` : !hasS && a.custom ? "Свого звуку ще немає: телефон прочитає текст. Звук можна додати в налаштуваннях." : !hasS ? "Звук тваринки ще не додано. Його можна завантажити в налаштуваннях." : "";
+  const s = document.createElement("section"); s.className = "st-slide" + (cur ? " cur" : ""); s.style.setProperty("--abg", a.bg); s.dataset.id = a.id;
+  s.innerHTML = `<button class="stage-art art ${pop ? "pop" : ""}" data-stage="again" aria-label="Ще раз" style="max-width:none">${animalArt(a.id)}</button>
+    <div class="stage-name">${esc(a.n)}</div>${a.s ? `<div class="stage-says">${esc(a.s)}</div>` : ""}<div class="stage-note"${cur ? ' id="stageNote"' : ""}>${note}</div>`;
+  return s;
+}
+function stageNb(d) { const n = stageList.length; return stageList[(stageIdx + d + n * 3) % n]; }
+function stageBuild(pop) {
+  const tr = $("#stTrack"); if (!tr) return; tr.innerHTML = "";
+  [-1, 0, 1].forEach(d => { const s = stageSlide(stageNb(d), d === 0, pop && d === 0); s.style.left = d * 100 + "%"; tr.appendChild(s); });
+  tr.style.transition = "none"; tr.style.transform = "translate3d(0,0,0)";
+}
+const stageDrag = { moved: false };
+function stageSettle(dir) {
+  // dir: -1 = previous, +1 = next, 0 = snap back
+  const tr = $("#stTrack"); if (!tr) return; stageBusy = true;
+  const W = tr.clientWidth, ease = "transform .34s cubic-bezier(.22,.8,.24,1)";
+  tr.style.transition = ease; tr.style.transform = `translate3d(${-dir * W}px,0,0)`;
+  let done = false;
+  const fin = () => {
+    if (done) return; done = true; tr.removeEventListener("transitionend", fin);
+    if (!$("#stage.pager")) { stageBusy = false; return; }
+    if (dir) {
+      stageIdx = (stageIdx + dir + stageList.length) % stageList.length;
+      // reuse the slide that is now in the middle, only create the far one
+      const ch = Array.from(tr.children);
+      if (dir > 0) { ch[0].remove(); const s = stageSlide(stageNb(1), false); tr.appendChild(s); } else { ch[2].remove(); const s = stageSlide(stageNb(-1), false); tr.insertBefore(s, tr.firstChild); }
+      const kids = Array.from(tr.children); kids.forEach((s, k) => { s.style.left = (k - 1) * 100 + "%"; s.classList.toggle("cur", k === 1); const n = $("#stageNote", s); if (n) n.removeAttribute("id"); });
+      const note = $(".stage-note", kids[1]); if (note) note.id = "stageNote";
+      tr.style.transition = "none"; tr.style.transform = "translate3d(0,0,0)";
+      stageKnownRefresh();
+      const say = settings.say || "both"; if (say !== "none") runSay(stageList[stageIdx], say);
+    }
+    stageBusy = false;
+  };
+  tr.addEventListener("transitionend", fin); setTimeout(fin, 420);
+}
+function stageGo(dir) { if (stageBusy || stageList.length < 2) return; stopClip(); stageSettle(dir); }
+function stageBindDrag(el) {
+  let d = null;
+  el.addEventListener("pointerdown", e => {
+    if (stageBusy || stageList.length < 2 || e.button > 0 || e.target.closest(".st-bar,.stage-close,.st-arrow")) return;
+    const tr = $("#stTrack"); d = { id: e.pointerId, x0: e.clientX, y0: e.clientY, on: false, W: tr.clientWidth, hist: [], dx: 0 }; stageDrag.moved = false;
+  });
+  el.addEventListener("pointermove", e => {
+    if (!d || e.pointerId !== d.id) return;
+    const dx = e.clientX - d.x0;
+    if (!d.on) { if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(e.clientY - d.y0)) { if (Math.abs(e.clientY - d.y0) > 14) d = null; return; } d.on = true; stageDrag.moved = true; stopClip(); try { el.setPointerCapture(e.pointerId); } catch (_) { } const tr = $("#stTrack"); tr.style.transition = "none"; }
+    d.dx = clamp(dx, -d.W, d.W);
+    const t = performance.now(); d.hist.push([t, e.clientX]); while (d.hist.length > 2 && t - d.hist[0][0] > 100) d.hist.shift();
+    $("#stTrack").style.transform = `translate3d(${d.dx}px,0,0)`;
+  });
+  const end = e => {
+    if (!d || e.pointerId !== d.id) return; const s0 = d; d = null; if (!s0.on) return;
+    let v = 0; const h = s0.hist; if (h.length >= 2) { const a = h[0], b = h[h.length - 1]; v = (b[1] - a[1]) / Math.max(1, b[0] - a[0]); }
+    const proj = s0.dx + v * 140;
+    const dir = proj < -s0.W * .35 || (v < -.4 && s0.dx < -20) ? 1 : proj > s0.W * .35 || (v > .4 && s0.dx > 20) ? -1 : 0;
+    stageSettle(dir); setTimeout(() => { stageDrag.moved = false; }, 60);
+  };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
 }
 function closeStage(instant) { stopClip(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
 document.addEventListener("click", e => { const c = e.target.closest("[data-animal]"); if (c) openStage(c.dataset.animal); });
@@ -2469,7 +2826,8 @@ function openProfile() {
     <button class="arow" type="button" data-act="animals"><span class="art">${animalArt("cow")}</span><span style="flex:1"><b>Тваринки</b><span class="muted small">Картинки, звуки і голос для назв</span></span></button>
 
     <div class="sec-title">Тема</div>
-    <div class="seg" id="stTheme"><span class="pill"></span>${THEMES.map(([v, t]) => `<button data-v="${v}" class="${(isDark() ? "dark" : "light") === v ? "on" : ""}">${t}</button>`).join("")}</div>
+    <div class="seg" id="stTheme"><span class="pill"></span>${THEMES.map(([v, t]) => { const cur = settings.theme === "dark" || settings.theme === "light" ? settings.theme : "auto"; return `<button data-v="${v}" class="${cur === v ? "on" : ""}">${t}</button>`; }).join("")}</div>
+    <div class="muted small" style="margin:8px 4px 0">«Авто»: темна тема з 20:00 до 8:00, вдень світла.</div>
 
     <div class="sec-title">Колір</div>
     <div class="group"><div class="swatches" id="stPal">${PALETTES.map(([v, t, col]) => `<button class="sw ${settings.palette === v ? "on" : ""}" data-v="${v}" style="background:${col}" aria-label="${t}" title="${t}"></button>`).join("")}</div><div class="muted small" id="stPalName">${PALETTES.find(p => p[0] === settings.palette)[1]}</div></div>
@@ -2477,11 +2835,8 @@ function openProfile() {
     <div class="sec-title">Шрифт</div>
     <div class="opt-list" id="stFont">${FONTS.map(f => `<button data-v="${f}" class="${settings.font === f ? "on" : ""}" style="font-family:'${f}'">${f}<br><span class="muted small">Добраніч, малюче</span></button>`).join("")}</div>
 
-    <div class="sec-title">Ефект скла</div>
-    <div class="seg" id="stGlass"><span class="pill"></span>${GLASS.map(([v, t]) => `<button data-v="${v}" class="${settings.glass === v ? "on" : ""}">${t}</button>`).join("")}</div>
-
     <button type="button" class="signout" onclick="window.__signOut&&window.__signOut()">Вийти з акаунта</button>
-    <div class="disclaimer" style="margin-top:10px">Сплюшка · v0.9 · безкоштовно і без реклами</div>
+    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.0 · безкоштовно і без реклами</div>
   `, sh => {
     let gender = c.gender || "";
     initSeg($("#pfGender", sh), v => gender = v);
@@ -2498,7 +2853,6 @@ function openProfile() {
     });
     const pd = $("#pfPhotoDel", sh); if (pd) pd.addEventListener("click", async () => { const o = Object.assign({}, state.child); delete o.photo; try { await store.setChild(o); toast("Фото прибрано"); openProfile(); } catch (e) { } });
     initSeg($("#stTheme", sh), v => switchTheme(v));
-    initSeg($("#stGlass", sh), v => { settings.glass = v; saveSettings(); });
     $$("#stPal .sw", sh).forEach(b => b.addEventListener("click", () => { settings.palette = b.dataset.v; $$("#stPal .sw", sh).forEach(x => x.classList.toggle("on", x === b)); $("#stPalName", sh).textContent = PALETTES.find(p => p[0] === b.dataset.v)[1]; saveSettings(); }));
     $$("#stFont button", sh).forEach(b => b.addEventListener("click", () => { settings.font = b.dataset.v; $$("#stFont button", sh).forEach(x => x.classList.toggle("on", x === b)); saveSettings(); setTimeout(() => { $$(".seg").forEach(s => { const on = s.querySelector(".on"), p = s.querySelector(".pill"); if (on && p) { p.style.left = on.offsetLeft + "px"; p.style.width = on.offsetWidth + "px"; } }); }, 250); }));
   });
@@ -2515,6 +2869,7 @@ function toast(msg, actLabel, act) {
 
 /* ============ global actions ============ */
 document.addEventListener("click", async e => {
+  const mk = e.target.closest("[data-mk]"); if (mk) { const l = (milesByDay()[mk.dataset.mk] || []).map(m => `${m.e} ${m.label}`).join(", "); toast(l); return; }
   const a = e.target.closest("[data-act]"); const ed = e.target.closest("[data-edit]");
   if (ed) { openEdit(ed.dataset.edit); return; }
   if (!a) return;
@@ -2524,6 +2879,10 @@ document.addEventListener("click", async e => {
   else if (act === "animals") openAnimalsList();
   else if (act === "quiz") openQuiz(+(settings.animalMode || 2));
   else if (act === "skills") openSkills();
+  else if (act === "word-add") openWords(true);
+  else if (act === "words") openWords(false);
+  else if (act === "mile") openMile();
+  else if (act === "speech-next") { speechPage = speechPage ? 0 : 1; renderDev(); }
   else if (act === "add") openEdit(null);
   else if (act === "tips") { state.sleepSeg = "tips"; renderSleep(); setTab("sleep"); }
   else if (act === "soon") toast("Цей розділ у розробці");
@@ -2557,7 +2916,7 @@ function tick() {
 }
 setInterval(tick, 1000);
 let lastMinute = new Date().getMinutes();
-setInterval(() => { const m = new Date().getMinutes(); if (m !== lastMinute) { lastMinute = m; if (new Date().getSeconds() < 2 || m % 1 === 0) renderHome(); } }, 5000);
+setInterval(() => { const m = new Date().getMinutes(); if (m !== lastMinute) { lastMinute = m; if (new Date().getSeconds() < 2 || m % 1 === 0) renderHome(); autoThemeCheck(); } }, 5000);
 
 /* ============ sound engine (Web Audio, generated) ============ */
 function seamless(sr, sec, gen) {
