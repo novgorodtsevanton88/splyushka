@@ -247,6 +247,22 @@ h1,h2,h3{ text-wrap:balance; margin:0; }
 .chips{ display:flex; flex-wrap:wrap; gap:8px; }
 .chips button{ padding:8px 13px; border-radius:999px; background:var(--line); font-size:14px; font-weight:700; }
 .chips button.on{ background:var(--accent); color:var(--ink); }
+/* v1.1 lullabies */
+.lulls .seg{ margin-bottom:10px; }
+.lrows{ display:flex; flex-direction:column; gap:4px; }
+.lrow{ display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:16px; transition:background .25s; }
+.lrow.on{ background:color-mix(in srgb,var(--accent) 22%,transparent); }
+.lplay{ width:42px; height:42px; border-radius:50%; flex:none; display:grid; place-items:center; background:var(--accent-soft); color:var(--text); font-weight:800; }
+.lplay svg{ width:18px; height:18px; fill:currentColor; margin-left:2px; }
+.lplay:disabled{ opacity:.55; }
+.lplay .eq{ display:flex; gap:3px; align-items:flex-end; height:18px; }
+.lrow.on .lplay{ background:var(--accent); color:var(--ink); }
+.ltxt{ flex:1; min-width:0; text-align:left; display:flex; flex-direction:column; }
+.ltxt b{ font-size:15px; font-weight:800; }
+.ltxt span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lchip{ flex:none; padding:7px 11px; border-radius:999px; background:var(--line); font-size:13px; font-weight:800; }
+.spinner.sm{ width:18px; height:18px; border-width:2px; margin:0; }
+.lyrics{ white-space:pre-line; font-size:19px; line-height:1.65; font-weight:600; padding:4px 2px; }
 
 /* tips */
 .tip{ border-radius:20px; overflow:hidden; margin-bottom:10px; }
@@ -1024,7 +1040,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) auto
 new MutationObserver(m => { if (m.some(x => x.attributeName === "data-theme")) applySettings(); }).observe(document.documentElement, { attributes: true });
 
 /* ============ state & store ============ */
-const state = { tab: "home", sleepSeg: "log", child: null, sleeps: [], loaded: false, sync: "init", canWrite: true, animals: { img: {}, snd: {}, voice: {} }, zoo: {}, devDays: {}, skills: {}, known: {}, words: {}, miles: {} };
+const state = { tab: "home", sleepSeg: "log", child: null, sleeps: [], loaded: false, sync: "init", canWrite: true, animals: { img: {}, snd: {}, voice: {} }, zoo: {}, devDays: {}, skills: {}, known: {}, words: {}, miles: {}, lulls: {} };
 
 const store = {
   mode: "local", db: null,
@@ -1091,9 +1107,10 @@ const store = {
       this.db.collection("known").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.known = o; renderDev(); stageKnownRefresh(); }, e => console.warn("known", e && e.code));
       this.db.collection("words").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.words = o; renderDev(); fillWords(); refreshChart(); }, e => console.warn("words", e && e.code));
       this.db.collection("miles").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.miles = o; fillMiles(); refreshChart(); }, e => console.warn("miles", e && e.code));
+      this.db.collection("lulls").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.lulls = o; refreshSoundsUI(); }, e => console.warn("lulls", e && e.code));
     } else {
       state.animals = Object.assign({ img: {}, snd: {}, voice: {} }, LS.get("local.animals", {}));
-      state.zoo = LS.get("local.zoo", {}); state.devDays = LS.get("local.devDays", {}); state.skills = LS.get("local.skills", {}); state.known = LS.get("local.known", {}); state.words = LS.get("local.words", {}); state.miles = LS.get("local.miles", {});
+      state.zoo = LS.get("local.zoo", {}); state.devDays = LS.get("local.devDays", {}); state.skills = LS.get("local.skills", {}); state.known = LS.get("local.known", {}); state.words = LS.get("local.words", {}); state.miles = LS.get("local.miles", {}); state.lulls = LS.get("local.lulls", {});
     }
   },
   async putDoc(col, id, data, localKey, field, after) {
@@ -1105,6 +1122,7 @@ const store = {
   setKnown(id, data) { return this.putDoc("known", id, data, "local.known", "known", () => { renderDev(); stageKnownRefresh(); }); },
   setWord(id, data) { return this.putDoc("words", id, data, "local.words", "words", () => { renderDev(); fillWords(); refreshChart(); }); },
   setMile(id, data) { return this.putDoc("miles", id, data, "local.miles", "miles", () => { fillMiles(); refreshChart(); }); },
+  setLull(id, data) { return this.putDoc("lulls", id, data, "local.lulls", "lulls", refreshSoundsUI); },
   setSkill(id, data) { return this.putDoc("skills", id, data, "local.skills", "skills", () => { renderDev(); fillSkills(); }); },
   async setAnimal(kind, id, data) {
     const col = { img: "animalImg", snd: "animalSnd", voice: "animalVoice" }[kind];
@@ -1555,11 +1573,12 @@ function logHtml() {
 }
 
 function soundsHtml() {
-  const on = Sound.curId;
+  const on = Sound.curId, lt = Lull.curId && lullById(Lull.curId), any = on || lt;
+  const nm = [on ? SOUNDS.find(s => s[0] === on)[1] : "", lt ? lt.n : ""].filter(Boolean).join(" + ");
   return `<div class="card glass player" id="player">
       <div class="player-top">
-        <button class="play" id="sndPlay" aria-label="${on ? "Пауза" : "Відтворити"}">${on ? ICON.pause : ICON.play}</button>
-        <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:18px" id="sndName">${on ? SOUNDS.find(s => s[0] === on)[1] : "Оберіть звук"}</div>
+        <button class="play" id="sndPlay" aria-label="${any ? "Пауза" : "Відтворити"}">${any ? ICON.pause : ICON.play}</button>
+        <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:18px" id="sndName">${nm ? esc(nm) : "Оберіть звук"}</div>
         <div class="muted small" id="sndTimer">${Sound.timerEnd ? "Вимкнеться через " + fmtClock(Sound.timerEnd - Date.now()) : "Без таймера"}</div></div>
       </div>
       <div class="field"><label for="sndVol">Гучність</label><input type="range" class="range" id="sndVol" min="0" max="1" step="0.01" value="${Sound.volume}"></div>
@@ -1567,15 +1586,17 @@ function soundsHtml() {
       <div class="toggle-row"><div><b>Не гасити екран</b><div class="muted small">Поки грає звук</div></div><button class="switch ${settings.keepAwake ? "on" : ""}" id="sndWake" aria-label="Не гасити екран"></button></div>
     </div>
     <div class="sounds">${SOUNDS.map(([id, n, d, svg]) => `<button class="snd glass ${on === id ? "on" : ""}" data-snd="${id}"><span class="si"><svg viewBox="0 0 24 24">${svg}</svg></span><span class="eq"><i></i><i></i><i></i></span><b>${n}</b><span>${d}</span></button>`).join("")}</div>
-    <div class="disclaimer">Тримайте гучність не вище тихої розмови, а телефон щонайменше за 2 м від ліжечка. На iPhone звук може зупинитися, коли екран блокується.</div>`;
+    ${lullsHtml()}
+    <div class="disclaimer">Тримайте гучність не вище тихої розмови, а телефон щонайменше за 2 м від ліжечка. На iPhone звук може зупинитися, коли екран блокується: увімкніть «Не гасити екран».</div>`;
 }
 
 function bindSounds() {
   $$("[data-snd]").forEach(b => b.addEventListener("click", () => { if (Sound.curId === b.dataset.snd) Sound.stop(); else Sound.play(b.dataset.snd); }));
-  $("#sndPlay").addEventListener("click", () => { if (Sound.curId) Sound.stop(); else Sound.play(Sound.lastId || "pink"); });
+  $("#sndPlay").addEventListener("click", () => { if (Sound.curId || Lull.curId) stopAllSound(); else if (!Sound.lastId && settings.lullLast && lullPlayable(lullById(settings.lullLast))) Lull.play(settings.lullLast); else Sound.play(Sound.lastId || "pink"); });
   $("#sndVol").addEventListener("input", e => Sound.setVolume(+e.target.value));
   $$("#sndTimers button").forEach(b => b.addEventListener("click", () => { Sound.setTimer(+b.dataset.min); $$("#sndTimers button").forEach(x => x.classList.toggle("on", x === b)); }));
   $("#sndWake").addEventListener("click", e => { settings.keepAwake = !settings.keepAwake; LS.set("settings", settings); e.currentTarget.classList.toggle("on", settings.keepAwake); Sound.updateWake(); });
+  bindLulls();
 }
 function refreshSoundsUI() { if (state.tab === "sleep" && state.sleepSeg === "sounds") { const sc = $("#view-sleep").scrollTop; renderSleep(); $("#view-sleep").scrollTop = sc; } }
 
@@ -2420,7 +2441,7 @@ function stageBindDrag(el) {
   };
   el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
 }
-function closeStage(instant) { stopClip(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
+function closeStage(instant) { stopClip(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId && !Lull.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
 document.addEventListener("click", e => { const c = e.target.closest("[data-animal]"); if (c) openStage(c.dataset.animal); });
 
 /* ---------- animal quiz: one of two / one of three ---------- */
@@ -2836,7 +2857,7 @@ function openProfile() {
     <div class="opt-list" id="stFont">${FONTS.map(f => `<button data-v="${f}" class="${settings.font === f ? "on" : ""}" style="font-family:'${f}'">${f}<br><span class="muted small">Добраніч, малюче</span></button>`).join("")}</div>
 
     <button type="button" class="signout" onclick="window.__signOut&&window.__signOut()">Вийти з акаунта</button>
-    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.0 · безкоштовно і без реклами</div>
+    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.1 · безкоштовно і без реклами</div>
   `, sh => {
     let gender = c.gender || "";
     initSeg($("#pfGender", sh), v => gender = v);
@@ -3021,17 +3042,17 @@ const Sound = {
     this.updateWake(); refreshSoundsUI();
   },
   fadeOut(node, sec) { try { const t = this.ctx.currentTime; node.gn.gain.cancelScheduledValues(t); node.gn.gain.setValueAtTime(node.gn.gain.value, t); node.gn.gain.linearRampToValueAtTime(0, t + sec); node.src.stop(t + sec + 0.05); } catch (e) { } },
-  stop(sec = 1) { if (this.cur) this.fadeOut(this.cur, sec); this.cur = null; this.curId = null; this.timerEnd = null; this.fading = false; try { this.html && this.html.pause(); } catch (e) { } this.updateWake(); refreshSoundsUI(); },
+  stop(sec = 1) { if (this.cur) this.fadeOut(this.cur, sec); this.cur = null; this.curId = null; if (!Lull.curId) { this.timerEnd = null; this.fading = false; try { this.html && this.html.pause(); } catch (e) { } } this.updateWake(); refreshSoundsUI(); },
   setVolume(v) { this.volume = v; if (this.master) this.master.gain.setTargetAtTime(v, this.ctx.currentTime, 0.05); },
-  setTimer(m) { this.timerMin = m; this.timerEnd = m && this.curId ? Date.now() + m * MIN : null; this.fading = false; const el = $("#sndTimer"); if (el) el.textContent = this.timerEnd ? "Вимкнеться через " + fmtClock(this.timerEnd - Date.now()) : "Без таймера"; },
+  setTimer(m) { this.timerMin = m; this.timerEnd = m && (this.curId || Lull.curId) ? Date.now() + m * MIN : null; this.fading = false; const el = $("#sndTimer"); if (el) el.textContent = this.timerEnd ? "Вимкнеться через " + fmtClock(this.timerEnd - Date.now()) : "Без таймера"; },
   tick(now) {
-    if (!this.timerEnd || !this.cur) return;
+    if (!this.timerEnd || !(this.cur || Lull.curId)) return;
     const left = this.timerEnd - now;
     const el = $("#sndTimer"); if (el) el.textContent = left > 0 ? "Вимкнеться через " + fmtClock(left) : "Вимикається…";
-    if (left <= 30000 && !this.fading) { this.fading = true; this.fadeOut(this.cur, Math.max(1, left / 1000)); setTimeout(() => { this.cur = null; this.stop(0.1); }, Math.max(1000, left)); }
+    if (left <= 30000 && !this.fading) { this.fading = true; const sec = Math.max(1, left / 1000); if (this.cur) this.fadeOut(this.cur, sec); Lull.fade(sec); setTimeout(() => { this.cur = null; if (Lull.node) Lull.node = null; Lull.stop(0.1); this.stop(0.1); this.timerEnd = null; this.fading = false; }, Math.max(1000, left)); }
   },
   async updateWake() {
-    const want = settings.keepAwake && !!this.curId;
+    const want = settings.keepAwake && !!(this.curId || Lull.curId);
     try {
       if (want && !this.wakeLock && navigator.wakeLock) { this.wakeLock = await navigator.wakeLock.request("screen"); this.wakeLock.addEventListener("release", () => { this.wakeLock = null; }); }
       else if (!want && this.wakeLock) { await this.wakeLock.release(); this.wakeLock = null; }
@@ -3039,7 +3060,223 @@ const Sound = {
     } catch (e) { if (want) toast("Не вдалося заборонити вимкнення екрана тут"); }
   }
 };
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { if (Sound.curId) Sound.updateWake(); renderHome(); } });
+
+/* ============ v1.1: lullabies (music box synth + own files) ============ */
+// d = durations in beats; seconds = d * 60 / bpm. Melodies are public-domain or folk.
+const LULLS = [
+  { id: "l_son", n: "Ой ходить сон коло вікон", d: "українська народна", bpm: 64,
+    m: "E5:.5 E5:.5 D5:.5 C5:.5 B4:.5 C5:.5 B4:1 A4:2 D5:.5 D5:.5 C5:.5 B4:.5 A4:.5 B4:.5 A4:1 G4:2 E5:.5 E5:.5 D5:.5 C5:.5 B4:.5 C5:.5 B4:1 A4:2 D5:.5 C5:.5 B4:.5 A4:.5 G4:.5 B4:.5 A4:3",
+    w: "Ой ходить сон коло вікон,\nА дрімота — коло плота.\nПитається сон дрімоти:\n— Де ж ми будем ночувати?\n\n— Де хатонька теплесенька,\nДе дитинка малесенька, —\nТам ми будем ночувати\nІ дитинку колисати.\n\nОй на кота та воркота,\nНа дитину та й дрімота.\nКотик буде воркотати,\nДитинонька буде спати." },
+  { id: "l_kit", n: "Котику сіренький", d: "українська народна", bpm: 76,
+    m: "A4:.5 C5:.5 E5:.5 E5:.5 D5:1 C5:1 B4:.5 D5:.5 D5:.5 D5:.5 C5:1 B4:1 A4:.5 C5:.5 E5:.5 E5:.5 D5:1 C5:1 B4:.5 D5:.5 C5:.5 B4:.5 A4:2",
+    w: "Котику сіренький,\nКотику біленький,\nКотку волохатий,\nНе ходи по хаті.\n\nНе ходи по хаті,\nНе буди дитяти.\nДитя буде спати,\nКотик воркотати.\n\nОй на кота воркота,\nНа дитину дрімота." },
+  { id: "l_bayu", n: "Баю-баю", d: "народна, гойдалка на два звуки", bpm: 70,
+    m: "E4:1 G4:1 E4:1 G4:1 A4:2 G4:2 F4:1 A4:1 F4:1 A4:1 G4:2 E4:2 E4:1 G4:1 E4:1 G4:1 A4:2 G4:2 F4:1 E4:1 D4:1 E4:1 C4:4" },
+  { id: "l_brahms", n: "Колискова Брамса", d: "Й. Брамс, 1868", bpm: 84,
+    m: "E4:.5 E4:.5 G4:2 E4:.5 E4:.5 G4:2 E4:.5 G4:.5 C5:1 B4:1.5 A4:.5 A4:1 G4:1 D4:.5 E4:.5 F4:1 D4:1 D4:.5 E4:.5 F4:2 D4:.5 F4:.5 B4:.5 A4:.5 G4:1 B4:1 C5:3 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4:1 G4:1 A4:1 G4:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4:1 E4:1 D4:1 C4:3" },
+  { id: "l_star", n: "Сяй, сяй, зіронько", d: "французька народна мелодія", bpm: 76,
+    m: "C4:1 C4:1 G4:1 G4:1 A4:1 A4:1 G4:2 F4:1 F4:1 E4:1 E4:1 D4:1 D4:1 C4:2 G4:1 G4:1 F4:1 F4:1 E4:1 E4:1 D4:2 G4:1 G4:1 F4:1 F4:1 E4:1 E4:1 D4:2 C4:1 C4:1 G4:1 G4:1 A4:1 A4:1 G4:2 F4:1 F4:1 E4:1 E4:1 D4:1 D4:1 C4:2",
+    w: "Сяй, сяй, зіронько мала,\nТи над ліжечком зійшла.\nВисоко у небесах\nСвітиш діткам уві снах.\nСяй, сяй, зіронько мала,\nСонна ніченька прийшла.", wn: "Українські слова написані для Сплюшки." },
+  { id: "l_rock", n: "Rock-a-bye Baby", d: "англійська народна", bpm: 150,
+    m: "E4:1.5 G4:.5 E5:1 D5:2 C5:1 E4:1.5 G4:.5 C5:1 B4:3 E4:1.5 G4:.5 F5:1 E5:2 D5:1 D5:1 C5:1 A4:1 G4:3 E4:1.5 G4:.5 E5:1 D5:2 C5:1 E4:1.5 G4:.5 C5:1 B4:2 A4:1 G4:1 C5:1 F5:1 E5:1 C5:2 D5:1 A4:1 B4:1 C5:3" },
+];
+const LULL_MODES = [["one", "Одна по колу"], ["all", "Усі підряд"]];
+function noteHz(s) { const m = /^([A-G])([#b]?)(\d)$/.exec(s); if (!m) return 0; const n = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0) + (+m[3] + 1) * 12; return 440 * Math.pow(2, (n - 69) / 12); }
+async function renderLullaby(t) {
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!OAC) throw new Error("nooffline");
+  const notes = t.m.trim().split(/\s+/).map(x => { const [p, d] = x.split(":"); return [p === "R" ? 0 : noteHz(p) * 2, +d * 60 / t.bpm]; });
+  const total = notes.reduce((a, n) => a + n[1], 0), sr = 32000, len = Math.ceil((total + 3) * sr);
+  const off = new OAC(1, len, sr);
+  const dry = off.createGain(); dry.gain.value = 0.8; dry.connect(off.destination);
+  // small room: generated impulse response
+  const ir = off.createBuffer(1, sr * 2.4, sr), d = ir.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3.2) * 0.5;
+  const rev = off.createConvolver(); rev.buffer = ir; const wet = off.createGain(); wet.gain.value = 0.32; dry.connect(rev); rev.connect(wet); wet.connect(off.destination);
+  const lp = off.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 4200; lp.connect(dry);
+  let at = 0.25;
+  notes.forEach(([f, dur]) => {
+    if (f) {
+      const ring = Math.min(2.6, dur + 1.4), v = 0.22 * (1 - Math.min(0.35, (f - 500) / 3000));
+      [[1, 1], [2, 0.16], [3, 0.05], [4.2, 0.025]].forEach(([h, g], k) => {
+        const o = off.createOscillator(), e = off.createGain(); o.type = "sine"; o.frequency.value = f * h * (k ? 1.0015 : 1);
+        const st = at + (Math.random() - 0.5) * 0.012;
+        e.gain.setValueAtTime(0, st); e.gain.linearRampToValueAtTime(v * g, st + 0.006); e.gain.exponentialRampToValueAtTime(0.0001, st + ring / (k ? 1.8 * k : 1));
+        o.connect(e); e.connect(lp); o.start(st); o.stop(st + ring + 0.05);
+      });
+    }
+    at += dur;
+  });
+  return off.startRendering();
+}
+
+/* own lullabies: audio stays in IndexedDB on this device, name and words sync in "lulls" */
+const LullDB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => { try { const r = indexedDB.open("splyushka-lulls", 1); r.onupgradeneeded = () => r.result.createObjectStore("files"); r.onsuccess = () => { this.db = r.result; res(this.db); }; r.onerror = () => rej(r.error); } catch (e) { rej(e); } });
+  },
+  async op(mode, fn) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction("files", mode), st = tx.objectStore("files"), rq = fn(st); tx.oncomplete = () => res(rq && rq.result); tx.onerror = () => rej(tx.error); }); },
+  get(id) { return this.op("readonly", s => s.get(id)).catch(() => null); },
+  put(id, blob) { return this.op("readwrite", s => s.put(blob, id)); },
+  del(id) { return this.op("readwrite", s => s.delete(id)).catch(() => { }); },
+  keys() { return this.op("readonly", s => s.getAllKeys()).catch(() => []); },
+};
+const lullHasFile = new Set();
+async function refreshLullFiles() { const ks = await LullDB.keys(); lullHasFile.clear(); (ks || []).forEach(k => lullHasFile.add(k)); refreshSoundsUI(); }
+function ownLulls() { return Object.entries(state.lulls || {}).map(([id, o]) => Object.assign({ id, own: true }, o)).sort((a, b) => (a.at || 0) - (b.at || 0)); }
+function lullById(id) { return LULLS.find(x => x.id === id) || ownLulls().find(x => x.id === id); }
+const lullPlayable = t => t && (t.m || (t.own && lullHasFile.has(t.id)));
+
+const Lull = {
+  curId: null, node: null, bufs: {}, loading: null, tok: 0,
+  mode() { return settings.lullMode === "all" ? "all" : "one"; },
+  async buffer(t) {
+    const key = t.id + (t.at || "");
+    if (this.bufs[key]) return this.bufs[key];
+    let b;
+    if (t.m) b = await renderLullaby(t);
+    else {
+      const blob = await LullDB.get(t.id); if (!blob) throw new Error("nofile");
+      const ab = await blob.arrayBuffer();
+      b = await new Promise((res, rej) => Sound.ctx.decodeAudioData(ab, res, rej));
+    }
+    // keep memory modest: only the two most recent buffers
+    const ks = Object.keys(this.bufs); if (ks.length > 1) delete this.bufs[ks[0]];
+    return this.bufs[key] = b;
+  },
+  async play(id) {
+    const t = lullById(id); if (!lullPlayable(t)) return;
+    if (!Sound.ensure()) return;
+    Sound.unlockHtml();
+    const tok = ++this.tok; this.loading = id; refreshSoundsUI();
+    let buf;
+    try { buf = await this.buffer(t); } catch (e) { if (tok === this.tok) { this.loading = null; refreshSoundsUI(); toast(e && e.message === "nofile" ? "Файлу цієї колискової немає на цьому телефоні" : "Не вдалося відтворити колискову"); } return; }
+    if (tok !== this.tok) return;
+    const ctx = Sound.ctx, src = ctx.createBufferSource(); src.buffer = buf; src.loop = this.mode() === "one";
+    const gn = ctx.createGain(); gn.gain.setValueAtTime(0, ctx.currentTime); gn.gain.linearRampToValueAtTime(t.m ? 1 : 0.9, ctx.currentTime + 1);
+    src.connect(gn); gn.connect(Sound.master); src.start();
+    if (this.node) Sound.fadeOut(this.node, 0.6);
+    const node = { src, gn }; this.node = node; this.curId = id; this.loading = null; settings.lullLast = id; LS.set("settings", settings);
+    src.onended = () => { if (this.node === node && this.mode() === "all") this.next(); };
+    if (Sound.timerMin && !Sound.timerEnd) Sound.timerEnd = Date.now() + Sound.timerMin * MIN;
+    this.media(t); Sound.updateWake(); refreshSoundsUI();
+  },
+  next() {
+    const list = LULLS.concat(ownLulls()).filter(lullPlayable); if (!list.length) return this.stop();
+    const i = list.findIndex(x => x.id === this.curId); this.play(list[(i + 1) % list.length].id);
+  },
+  fade(sec) { if (this.node) Sound.fadeOut(this.node, sec); },
+  stop(sec = 1) {
+    this.tok++; this.loading = null;
+    if (this.node) { const n = this.node; n.src.onended = null; Sound.fadeOut(n, sec); }
+    this.node = null; this.curId = null;
+    if (!Sound.curId) { Sound.timerEnd = null; Sound.fading = false; try { Sound.html && Sound.html.pause(); } catch (e) { } }
+    try { if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "none"; } catch (e) { }
+    Sound.updateWake(); refreshSoundsUI();
+  },
+  media(t) {
+    try {
+      if (!("mediaSession" in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({ title: t.n, artist: "Сплюшка", album: "Колискові", artwork: [{ src: "./icon-512.png", sizes: "512x512", type: "image/png" }] });
+      navigator.mediaSession.playbackState = "playing";
+      navigator.mediaSession.setActionHandler("pause", () => stopAllSound());
+      navigator.mediaSession.setActionHandler("stop", () => stopAllSound());
+      navigator.mediaSession.setActionHandler("play", () => { if (settings.lullLast) this.play(settings.lullLast); });
+      navigator.mediaSession.setActionHandler("nexttrack", () => this.next());
+    } catch (e) { }
+  },
+};
+function stopAllSound() { if (Lull.curId || Lull.loading) Lull.stop(); if (Sound.curId) Sound.stop(); }
+
+function lullsHtml() {
+  const list = LULLS.concat(ownLulls());
+  const row = t => {
+    const on = Lull.curId === t.id, ld = Lull.loading === t.id, can = lullPlayable(t);
+    const sub = t.own ? (can ? "свій запис" + (t.fname ? " · " + esc(t.fname) : "") : t.file ? "файл на іншому телефоні" : "лише слова") : esc(t.d);
+    return `<div class="lrow ${on ? "on" : ""}">
+      <button class="lplay" data-lull="${esc(t.id)}" ${can ? "" : "disabled"} aria-label="${on ? "Зупинити" : "Грати"} ${esc(t.n)}">${ld ? '<span class="spinner sm"></span>' : on ? '<span class="eq"><i></i><i></i><i></i></span>' : can ? ICON.play : "♪"}</button>
+      <button class="ltxt" data-lw="${esc(t.id)}"><b>${esc(t.n)}</b><span class="muted small">${sub}</span></button>
+      ${t.w ? `<button class="lchip" data-lw="${esc(t.id)}">Слова</button>` : ""}
+      ${t.own ? `<button class="lchip" data-ledit="${esc(t.id)}" aria-label="Змінити">✎</button>` : ""}
+    </div>`;
+  };
+  const mode = Lull.mode();
+  return `<div class="sec-title">Колискові</div>
+    <div class="card glass lulls">
+      <div class="seg" id="lullMode"><span class="pill"></span>${LULL_MODES.map(([v, t]) => `<button data-v="${v}" class="${mode === v ? "on" : ""}">${t}</button>`).join("")}</div>
+      <div class="lrows">${list.map(row).join("")}</div>
+      <button class="btn sm ghost" data-act="lull-add" style="margin-top:12px">＋ Своя колискова</button>
+      <p class="muted small" style="margin:10px 2px 0">Колискова й шум можуть грати разом: увімкніть обидва. Таймер вимкнення спільний.</p>
+    </div>`;
+}
+function bindLulls() {
+  const m = $("#lullMode"); if (m) initSeg(m, v => { settings.lullMode = v; LS.set("settings", settings); if (Lull.node) Lull.node.src.loop = v === "one"; });
+  $$("[data-lull]").forEach(b => b.addEventListener("click", () => { const id = b.dataset.lull; if (Lull.curId === id || Lull.loading === id) Lull.stop(); else Lull.play(id); }));
+  $$("[data-lw]").forEach(b => b.addEventListener("click", () => { const t = lullById(b.dataset.lw); if (!t) return; if (t.w || !lullPlayable(t)) openLyrics(t.id); else if (Lull.curId === t.id) Lull.stop(); else Lull.play(t.id); }));
+  $$("[data-ledit]").forEach(b => b.addEventListener("click", () => openLullEdit(b.dataset.ledit)));
+  const add = $('[data-act="lull-add"]'); if (add) add.addEventListener("click", () => openLullEdit(null));
+}
+function openLyrics(id) {
+  const t = lullById(id); if (!t) return;
+  const btn = () => { const on = Lull.curId === t.id; return lullPlayable(t) ? `<button class="btn" id="lyPlay" style="width:100%">${on ? "■ Зупинити" : "▶ Грати мелодію"}</button>` : ""; };
+  openSheet(`${sheetHead(esc(t.n))}
+    <div class="muted small" style="margin:-4px 2px 12px">${t.own ? "Своя колискова" : esc(t.d)}</div>
+    ${t.w ? `<div class="lyrics">${esc(t.w)}</div>` : `<p class="muted">Слів ще немає.${t.own ? " Їх можна додати кнопкою «Змінити»." : ""}</p>`}
+    ${t.wn ? `<p class="muted small" style="margin:10px 2px 0">${esc(t.wn)}</p>` : ""}
+    <div id="lyBtn" style="margin-top:16px">${btn()}</div>
+    ${t.own ? `<button class="btn ghost" id="lyEdit" style="width:100%;margin-top:10px">Змінити</button>` : ""}
+    <p class="muted small" style="margin:12px 2px 0">Наспівуйте разом із мелодією: малюкові найрідніший ваш голос.</p>`, sh => {
+    const bind = () => { const p = $("#lyPlay", sh); if (p) p.addEventListener("click", async () => { if (Lull.curId === t.id) Lull.stop(); else await Lull.play(t.id); $("#lyBtn", sh).innerHTML = btn(); bind(); }); };
+    bind();
+    const e = $("#lyEdit", sh); if (e) e.addEventListener("click", () => openLullEdit(t.id));
+  });
+}
+function openLullEdit(id) {
+  const o = id ? (state.lulls || {})[id] : null; const nid = id || rid();
+  const has = id && lullHasFile.has(id);
+  openSheet(`${sheetHead(o ? "Своя колискова" : "Нова колискова")}
+    <form class="form" id="lfForm">
+      <div class="field"><label for="lfName">Назва</label><input class="input" id="lfName" maxlength="60" required value="${esc(o ? o.n : "")}" placeholder="Наприклад, Бабусина колискова"></div>
+      <div class="field"><label for="lfWords">Слова (необовʼязково)</label><textarea class="input" id="lfWords" rows="7" maxlength="4000" style="resize:vertical;min-height:140px" placeholder="Кожен рядок з нового рядка">${esc(o && o.w || "")}</textarea></div>
+      <div class="field"><label>Аудіо (необовʼязково)</label>
+        <div class="muted small" id="lfFileTxt">${has ? "Файл є на цьому телефоні" + (o.fname ? ": " + esc(o.fname) : "") : o && o.file ? "Файл додали на іншому телефоні. Додайте його й тут, щоб грав." : "mp3, m4a або wav: ваш запис чи файл, на який у вас є права."}</div>
+        <div class="btn-row" style="margin-top:8px"><label class="btn sm" for="lfFile">${has ? "Замінити файл" : "Обрати файл"}</label><input class="vh" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.ogg" id="lfFile">${has ? `<button type="button" class="btn sm danger" id="lfFileDel">Прибрати файл</button>` : ""}</div>
+      </div>
+      <button class="btn" type="submit">Зберегти</button>
+      ${o ? `<button class="btn danger" type="button" id="lfDel">Видалити колискову</button>` : ""}
+    </form>
+    <p class="muted small" style="margin:12px 2px 0">Назва і слова зберігаються в спільних даних. Сам аудіофайл лежить лише на цьому телефоні: він завеликий для спільної бази. Не завантажуйте чужі записи з YouTube чи стрімінгів.</p>`, sh => {
+    let file = null, dropFile = false;
+    const fin = $("#lfFile", sh);
+    fin.addEventListener("change", () => { const f = fin.files && fin.files[0]; if (!f) return; if (f.size > 40 * 1024 * 1024) { toast("Файл завеликий: до 40 МБ"); fin.value = ""; return; } file = f; dropFile = false; $("#lfFileTxt", sh).textContent = "Обрано: " + f.name; if (!$("#lfName", sh).value.trim()) $("#lfName", sh).value = f.name.replace(/\.[^.]+$/, "").slice(0, 60); });
+    const fd = $("#lfFileDel", sh); if (fd) fd.addEventListener("click", () => { dropFile = true; file = null; $("#lfFileTxt", sh).textContent = "Файл буде прибрано після збереження"; });
+    $("#lfForm", sh).addEventListener("submit", async e => {
+      e.preventDefault();
+      const n = $("#lfName", sh).value.trim(); if (!n) return;
+      const w = $("#lfWords", sh).value.replace(/\r/g, "").trim();
+      if (file) {
+        // check that the phone can decode it before saving
+        try { if (!Sound.ensure()) throw 0; const ab = await file.arrayBuffer(); await new Promise((res, rej) => Sound.ctx.decodeAudioData(ab.slice(0), res, rej)); }
+        catch (_) { toast("Цей файл не вдається відтворити. Спробуйте mp3 або m4a."); return; }
+        try { await LullDB.put(nid, file); } catch (_) { toast("Не вдалося зберегти файл на телефоні"); return; }
+      } else if (dropFile) { await LullDB.del(nid); if (Lull.curId === nid) Lull.stop(); }
+      const data = { n, w, at: Date.now(), file: file ? true : dropFile ? false : !!(o && o.file), fname: file ? String(file.name).slice(0, 60) : dropFile ? "" : (o && o.fname) || "" };
+      try { await store.setLull(nid, data); } catch (_) { return; }
+      if (Lull.curId === nid && (file || dropFile)) Lull.stop();
+      closeSheet(); toast("Збережено"); refreshLullFiles();
+    });
+    const del = $("#lfDel", sh);
+    if (del) del.addEventListener("click", async () => {
+      if (!del.dataset.sure) { del.dataset.sure = "1"; del.textContent = "Точно видалити?"; return; }
+      if (Lull.curId === nid) Lull.stop();
+      await LullDB.del(nid); try { await store.setLull(nid, null); } catch (_) { return; }
+      closeSheet(); toast("Видалено"); refreshLullFiles();
+    });
+  });
+}
+refreshLullFiles();
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { if (Sound.curId || Lull.curId) Sound.updateWake(); renderHome(); } });
 
 /* ============ boot ============ */
 applySettings();
