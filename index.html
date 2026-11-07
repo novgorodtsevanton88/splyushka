@@ -359,7 +359,11 @@ html.dark .acard{ background:color-mix(in srgb,var(--abg) 26%,var(--surface)); c
 .art{ width:100%; max-width:96px; aspect-ratio:1; }
 .art svg, .art img{ width:100%; height:100%; display:block; object-fit:cover; border-radius:20px; }
 .art img.pic{ object-fit:contain; border-radius:0; -webkit-user-drag:none; user-select:none; }
-.stage-art img.pic{ filter:drop-shadow(0 14px 18px rgba(60,40,110,.18)); }
+/* shadow stays inside the box: Safari clips filters at the layer edge */
+.stage-art{ position:relative; }
+.stage-art img.pic{ width:84%; height:84%; margin:6% auto 0; filter:drop-shadow(0 6px 7px rgba(60,40,110,.16)); }
+.stage-art::after{ content:""; position:absolute; left:24%; right:24%; bottom:1%; height:7%; border-radius:50%; background:radial-gradient(closest-side, rgba(60,40,110,.2), transparent); z-index:-1; pointer-events:none; }
+html.dark .stage-art img.pic{ filter:drop-shadow(0 6px 7px rgba(0,0,0,.35)); }
 #stage{ position:fixed; inset:0; z-index:45; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 24px); background:color-mix(in srgb,var(--abg) 70%,var(--bg)); opacity:0; transition:opacity .3s; }
 html.dark #stage{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 #stage.show{ opacity:1; }
@@ -381,6 +385,67 @@ html.dark #stage{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 .arow b{ display:block; font-size:15px; }
 .media-box{ border-radius:18px; padding:12px 14px; background:var(--line); display:flex; flex-direction:column; gap:10px; }
 .media-box .mh{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-weight:800; }
+
+/* v0.9 · development: checklist, skills, animal modes */
+.hidden{ display:none !important; }
+.devday .card-head{ align-items:flex-start; }
+.dring{ --p:0; width:54px; height:54px; flex:none; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--accent) calc(var(--p) * 360deg), var(--accent-soft) 0); position:relative; }
+.dring::before{ content:""; position:absolute; inset:6px; border-radius:50%; background:var(--glass-strong); }
+.dring span{ position:relative; font-size:14px; font-weight:800; }
+.checks{ display:flex; flex-direction:column; gap:8px; }
+.chk{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:20px; background:var(--tile, var(--line)); cursor:pointer; transition:transform .15s, background .25s, opacity .25s; text-align:left; }
+.chk:active{ transform:scale(.98); }
+.chk .box{ width:28px; height:28px; flex:none; border-radius:50%; border:2px solid color-mix(in srgb,var(--accent) 55%,transparent); display:grid; place-items:center; transition:background .25s, border-color .25s; }
+.chk .box svg{ width:18px; height:18px; fill:none; stroke:#2b2450; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; animation:tick .35s cubic-bezier(.3,1.6,.5,1); }
+@keyframes tick{ from{ transform:scale(0); } to{ transform:scale(1); } }
+.chk.on .box{ background:var(--accent); border-color:var(--accent); }
+.chk .txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.chk .txt b{ font-size:15px; font-weight:800; line-height:1.25; }
+.chk .txt .small{ line-height:1.35; }
+.chk.on .txt b{ text-decoration:line-through; text-decoration-color:color-mix(in srgb,var(--text) 35%,transparent); color:var(--text-2); }
+.chk.sk.on .txt b{ text-decoration:none; color:var(--text); }
+.chk .cat{ font-size:18px; flex:none; opacity:.85; }
+.chk .swap{ width:34px; height:34px; flex:none; border-radius:50%; display:grid; place-items:center; background:var(--line); color:var(--text-2); }
+.chk .swap svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.chk.later{ opacity:.55; }
+.dweek{ display:flex; justify-content:space-between; margin-top:14px; padding:0 2px; }
+.wday{ display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px; font-weight:800; color:var(--text-2); }
+.wday i{ --f:0; width:22px; height:22px; border-radius:50%; background:conic-gradient(var(--accent) calc(var(--f) * 360deg), var(--line) 0); }
+.wday.now{ color:var(--text); }
+.wday.now i{ box-shadow:0 0 0 2px var(--glass-strong), 0 0 0 4px color-mix(in srgb,var(--accent) 60%,transparent); }
+.quiz-go{ width:100%; margin-top:12px; }
+.art .emo{ width:100%; height:100%; display:grid; place-items:center; font-size:44px; font-weight:800; line-height:1; color:#5b4f86; }
+.arow .art .emo{ font-size:24px; } .stage-art .emo{ font-size:120px; } .qopt .art .emo{ font-size:64px; } .quiz-opts.k3 .qopt .art .emo{ font-size:46px; } #aePrev .emo{ font-size:52px; }
+.arow.gone{ opacity:.7; }
+.pill-btn{ height:60px; padding:0 20px; border-radius:999px; display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:16px; }
+.pill-btn svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.stage-nav{ align-items:center; }
+/* quiz */
+#stage.quiz{ background:color-mix(in srgb,var(--accent) 16%,var(--bg)); gap:14px; }
+.quiz-score{ position:absolute; top:calc(env(safe-area-inset-top) + 22px); left:20px; font-size:20px; font-weight:800; }
+.quiz-score.bump{ animation:pop .45s cubic-bezier(.3,1.6,.5,1); }
+.quiz-q{ font-size:22px; font-weight:700; text-align:center; color:var(--text-2); line-height:1.25; }
+.quiz-q b{ font-size:34px; color:var(--text); letter-spacing:-.01em; }
+.quiz-hear{ height:52px; }
+.quiz-opts{ display:flex; gap:12px; justify-content:center; width:100%; max-width:560px; margin-top:6px; }
+.qopt{ flex:1; max-width:250px; min-width:0; border-radius:28px; padding:12px 8px 14px; background:var(--abg); display:flex; flex-direction:column; align-items:center; gap:6px; color:#2b2433; font-weight:800; font-size:16px; position:relative; transition:transform .2s, opacity .3s; box-shadow:0 14px 30px -16px var(--sh1); }
+html.dark .qopt{ background:color-mix(in srgb,var(--abg) 26%,var(--surface)); color:var(--text); }
+.qopt .art{ max-width:none; }
+.qopt .art img.pic{ width:88%; height:88%; margin:6% auto 0; }
+.quiz-opts.k3 .qopt{ font-size:14px; border-radius:24px; padding:10px 6px 12px; }
+.qopt:active{ transform:scale(.95); }
+.qopt.right{ transform:scale(1.07); box-shadow:0 0 0 4px #7fd6a2, 0 18px 36px -14px rgba(60,160,100,.45); z-index:1; }
+.qopt.right .art{ animation:wiggle .5s ease-in-out 2; }
+.qopt.fade{ opacity:.25; transform:scale(.94); }
+.qopt.wrong{ animation:shake .45s ease; }
+.qopt.tried{ opacity:.5; }
+@keyframes shake{ 0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-10px); } 40%{ transform:translateX(9px); } 60%{ transform:translateX(-6px); } 80%{ transform:translateX(4px); } }
+.burst{ position:absolute; left:50%; top:40%; width:0; height:0; pointer-events:none; }
+.burst i{ position:absolute; width:12px; height:12px; margin:-6px; background:var(--star, #ffd36b); clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation:burst .8s ease-out forwards; }
+.burst i:nth-child(1){ --a:0deg; } .burst i:nth-child(2){ --a:45deg; } .burst i:nth-child(3){ --a:90deg; } .burst i:nth-child(4){ --a:135deg; }
+.burst i:nth-child(5){ --a:180deg; } .burst i:nth-child(6){ --a:225deg; } .burst i:nth-child(7){ --a:270deg; } .burst i:nth-child(8){ --a:315deg; }
+@keyframes burst{ from{ transform:rotate(var(--a)) translateY(0) scale(.4); opacity:1; } to{ transform:rotate(var(--a)) translateY(-90px) scale(1.1); opacity:0; } }
+@media (prefers-reduced-motion: reduce){ .qopt.wrong, .qopt.right .art, .burst i{ animation:none; } }
 
 .loading{ text-align:center; padding:40px 10px; }
 .spinner{ width:34px; height:34px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); margin:0 auto 14px; animation:spin 1s linear infinite; }
@@ -862,7 +927,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem("drimka." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem("drimka." + k, JSON.stringify(v)); } catch (e) { } }
 };
-const settings = Object.assign({ theme: "auto", palette: "lavender", font: "Nunito", tabAnim: "drop", glass: "strong", keepAwake: false, tts: true }, LS.get("settings", {}));
+const settings = Object.assign({ theme: "auto", palette: "lavender", font: "Nunito", tabAnim: "drop", glass: "strong", keepAwake: false, tts: true, say: "both", animalMode: "listen" }, LS.get("settings", {}));
 delete settings.night;
 const PALETTES = [["lavender", "Лаванда", "#a593f5"], ["mint", "Мʼята", "#5cc7a8"], ["peach", "Персик", "#f4a184"], ["sky", "Небо", "#72b1ea"], ["rose", "Троянда", "#ec93b6"]];
 const FONTS = ["Nunito", "Manrope", "Comfortaa", "Rubik", "Golos Text", "Montserrat Alternates"];
@@ -910,7 +975,7 @@ mq && mq.addEventListener && mq.addEventListener("change", applySettings);
 new MutationObserver(m => { if (m.some(x => x.attributeName === "data-theme")) applySettings(); }).observe(document.documentElement, { attributes: true });
 
 /* ============ state & store ============ */
-const state = { tab: "home", sleepSeg: "log", child: null, sleeps: [], loaded: false, sync: "init", canWrite: true, animals: { img: {}, snd: {}, voice: {} } };
+const state = { tab: "home", sleepSeg: "log", child: null, sleeps: [], loaded: false, sync: "init", canWrite: true, animals: { img: {}, snd: {}, voice: {} }, zoo: {}, devDays: {}, skills: {} };
 
 const store = {
   mode: "local", db: null,
@@ -971,8 +1036,21 @@ const store = {
       Object.entries(map).forEach(([k, col]) => this.db.collection(col).onSnapshot(snap => {
         const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.animals[k] = o; onAnimalsChanged();
       }, e => console.warn("animals", e && e.code)));
-    } else { state.animals = Object.assign({ img: {}, snd: {}, voice: {} }, LS.get("local.animals", {})); }
+      this.db.collection("zoo").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.zoo = o; onAnimalsChanged(); }, e => console.warn("zoo", e && e.code));
+      this.db.collection("devDay").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.devDays = o; renderDev(); }, e => console.warn("devDay", e && e.code));
+      this.db.collection("skills").onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); state.skills = o; renderDev(); fillSkills(); }, e => console.warn("skills", e && e.code));
+    } else {
+      state.animals = Object.assign({ img: {}, snd: {}, voice: {} }, LS.get("local.animals", {}));
+      state.zoo = LS.get("local.zoo", {}); state.devDays = LS.get("local.devDays", {}); state.skills = LS.get("local.skills", {});
+    }
   },
+  async putDoc(col, id, data, localKey, field, after) {
+    if (this.mode === "db") { try { if (data) await this.db.doc(col + "/" + id).set(data); else await this.db.doc(col + "/" + id).delete(); } catch (e) { this.writeErr(e); } }
+    else { if (data) state[field][id] = data; else delete state[field][id]; LS.set(localKey, state[field]); after(); }
+  },
+  setZoo(id, data) { return this.putDoc("zoo", id, data, "local.zoo", "zoo", onAnimalsChanged); },
+  setDevDay(key, data) { return this.putDoc("devDay", key, data, "local.devDays", "devDays", renderDev); },
+  setSkill(id, data) { return this.putDoc("skills", id, data, "local.skills", "skills", () => { renderDev(); fillSkills(); }); },
   async setAnimal(kind, id, data) {
     const col = { img: "animalImg", snd: "animalSnd", voice: "animalVoice" }[kind];
     if (this.mode === "db") {
@@ -1642,21 +1720,217 @@ const isImgData = v => typeof v === "string" && /^data:image\/(png|jpe?g|webp);b
 const isClip = v => v && typeof v.data === "string" && /^[A-Za-z0-9+/=]+$/.test(v.data);
 /* illustrated animal faces: img/animals/<id>.webp (384px, transparent) */
 const ANIMAL_PIC_IDS = new Set(["cow", "dog", "cat", "pig", "hen", "rooster", "horse", "sheep", "duck", "goat", "frog", "bird"]);
-function animalArt(id) { const c = state.animals.img[id]; if (c && isImgData(c.data)) return `<img src="${esc(c.data)}" alt="">`; return ANIMAL_PIC_IDS.has(id) ? `<img class="pic" src="img/animals/${id}.webp" alt="" decoding="async" draggable="false">` : ANIMAL_SVG[id]; }
+function animalArt(id) {
+  const c = state.animals.img[id]; if (c && isImgData(c.data)) return `<img src="${esc(c.data)}" alt="">`;
+  if (ANIMAL_PIC_IDS.has(id)) return `<img class="pic" src="img/animals/${id}.webp" alt="" decoding="async" draggable="false">`;
+  if (ANIMAL_SVG[id]) return ANIMAL_SVG[id];
+  const z = (state.zoo || {})[id] || {}; return `<span class="emo">${esc(z.emo || ((z.n || "?").trim()[0] || "?").toUpperCase())}</span>`;
+}
 
+/* ---------- development: daily checklist ---------- */
+const DEV_CATS = { talk: ["🗣", "Мова"], move: ["🏃", "Рух"], hands: ["✋", "Руки"], think: ["🧩", "Мислення"], feel: ["🤗", "Емоції"], sense: ["🎵", "Відчуття"] };
+const DEV_BASICS = [
+  { id: "b_read", c: "talk", t: "Почитати книжку", d: "5–10 хвилин з картинками. Показуйте пальцем і називайте, що бачите.", m: [0, 72] },
+  { id: "b_out", c: "move", t: "Погуляти й порухатися", d: "Прогулянка, майданчик або вільна гра на підлозі без обмежень.", m: [0, 72] },
+  { id: "b_talk", c: "talk", t: "Розповідати, що робите", d: "Коротко коментуйте свої дії: «Мию яблучко. Вода холодна!»", m: [6, 48] },
+];
+const DEV_IDEAS = [
+  { id: "i_point", c: "talk", t: "Де котик?", d: "Розгляньте картинки чи речі вдома. Питайте «Де…?» і чекайте, поки малюк покаже.", m: [12, 30] },
+  { id: "i_body", c: "talk", t: "Де носик?", d: "Показуйте носик, вушка, ручки на собі, на ляльці й на малюкові.", m: [12, 30] },
+  { id: "i_phone", c: "talk", t: "Телефонна розмова", d: "Іграшковий телефон: «Алло! Хто там?» Зробіть паузу й дочекайтеся звуку чи слова.", m: [12, 36] },
+  { id: "i_choice", c: "talk", t: "Банан чи яблуко?", d: "Покажіть дві речі й спитайте, що хоче. Назвіть те, що вибрав малюк.", m: [12, 36] },
+  { id: "i_sounds", c: "talk", t: "Бі-бі і му-у", d: "Повторюйте звуки машин і тварин. Звуки даються легше, ніж слова.", m: [10, 24] },
+  { id: "i_tunnel", c: "move", t: "Тунель з подушок", d: "Проповзати під стільцем, перелазити через подушки, залазити в коробку.", m: [10, 30] },
+  { id: "i_ball", c: "move", t: "Котимо мʼячик", d: "Сядьте на підлогу навпроти й котіть мʼяч одне одному. Згодом можна штовхати ногою.", m: [10, 30] },
+  { id: "i_push", c: "move", t: "Штовхаємо візочок", d: "Каталка, ящик чи легкий стілець, який можна штовхати перед собою.", m: [9, 18] },
+  { id: "i_squat", c: "move", t: "Збери іграшки", d: "Розкладіть кілька іграшок на підлозі: хай присідає й складає їх у кошик.", m: [12, 24] },
+  { id: "i_dance", c: "move", t: "Танці й завмри", d: "Тупаємо, плескаємо, крутимося. Музика стихла — завмираємо.", m: [12, 48] },
+  { id: "i_stairs", c: "move", t: "Сходинки", d: "Підійматися на низьку сходинку чи диван і злазити ногами вперед, тримаючись за руку.", m: [12, 24] },
+  { id: "i_box", c: "hands", t: "Скарбничка", d: "Опускати великі кришечки в коробку з прорізом. Лише великі предмети і під наглядом.", m: [12, 30] },
+  { id: "i_blocks", c: "hands", t: "Башточка", d: "Ставити кубик на кубик і з радістю розвалювати.", m: [12, 30] },
+  { id: "i_draw", c: "hands", t: "Перші каракулі", d: "Товсті воскові крейди і великий аркуш, приклеєний до столу скотчем.", m: [12, 36] },
+  { id: "i_pages", c: "hands", t: "Гортаємо сторінки", d: "Книжка з картонними сторінками: хай гортає сам, а ви називайте картинки.", m: [12, 24] },
+  { id: "i_lids", c: "hands", t: "Відкрий-закрий", d: "Коробочки, баночки з великими кришками, сумочка на липучці.", m: [12, 30] },
+  { id: "i_pour", c: "hands", t: "Пересипаємо", d: "Пересипати крупу чи переливати воду з миски в миску. Тільки під наглядом.", m: [14, 36] },
+  { id: "i_dough", c: "hands", t: "Мʼяке тісто", d: "Мʼяти, рвати й тиснути пальчиком солоне тісто або пластилін для малюків.", m: [15, 48] },
+  { id: "i_hide", c: "think", t: "Знайди іграшку", d: "Сховайте іграшку під хустинку, поки малюк дивиться. Потім ховайте складніше.", m: [9, 20] },
+  { id: "i_cups", c: "think", t: "Стаканчики", d: "Вкладати стаканчики один в один, будувати з них вежу.", m: [10, 24] },
+  { id: "i_sort", c: "think", t: "Сортування", d: "Дві миски: «кубики сюди, мʼячики туди». Покажіть один раз і дайте спробувати.", m: [18, 36] },
+  { id: "i_pretend", c: "think", t: "Нагодуй ведмедика", d: "Годуйте іграшку ложкою, вкладайте спати, вкривайте ковдрою.", m: [13, 36] },
+  { id: "i_shapes", c: "think", t: "Сортер і вкладиші", d: "Почніть з однієї простої фігури, наприклад кола, і додавайте поступово.", m: [14, 30] },
+  { id: "i_cause", c: "think", t: "Натисни — і станеться", d: "Вимикач світла, дзвіночок, іграшка з кнопкою: «Натиснули — і світло!»", m: [9, 18] },
+  { id: "i_mirror", c: "feel", t: "Мордочки в дзеркалі", d: "Корчте разом пики: радісна, сумна, здивована. Називайте емоцію.", m: [9, 30] },
+  { id: "i_help", c: "feel", t: "Маленький помічник", d: "Просте доручення: принести шкарпетку, покласти річ у кошик. Подякуйте.", m: [13, 36] },
+  { id: "i_peek", c: "feel", t: "Ку-ку і лоскотушки", d: "Ховайтеся за долонями чи рушником, лоскочіть, «бодайте» лобиком.", m: [8, 24] },
+  { id: "i_feel", c: "feel", t: "Назвати почуття", d: "Коли малюк засмутився чи зрадів, скажіть уголос: «Ти засмутилась, бо…»", m: [12, 48] },
+  { id: "i_texture", c: "sense", t: "Мішечок відчуттів", d: "Шматочки тканини, губка, щіточка: «Мʼяке! Колюче! Гладеньке!»", m: [8, 24] },
+  { id: "i_water", c: "sense", t: "Гра з водою", d: "У ванні переливати з чашки в чашку, ловити іграшки, бризкати.", m: [9, 36] },
+  { id: "i_drum", c: "sense", t: "Оркестр", d: "Каструля й дерев'яна ложка, коробочка з крупою: стукаємо тихо й голосно.", m: [9, 30] },
+  { id: "i_nature", c: "sense", t: "Скарби з прогулянки", d: "Листочки, шишки, великі камінці: розглядати, торкатися й називати.", m: [12, 36] },
+  { id: "i_song", c: "sense", t: "Потішка з рухами", d: "«Сорока-ворона», «Ладки»: та сама потішка багато разів поспіль.", m: [6, 30] },
+];
+const DEV_ALL = DEV_BASICS.concat(DEV_IDEAS);
+const DEV_ROT = ["move", "hands", "think", "feel", "sense", "talk"];
+const dayKey = (ms = Date.now()) => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const hashStr = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return Math.abs(h); };
+const fitAge = (x, m) => m >= x.m[0] - 1 && m <= x.m[1];
+function devAge() { const m = childAgeMonths(); return m == null ? 14 : m; }
+function devPlan(key = dayKey()) {
+  const m = devAge(), saved = state.devDays[key];
+  const basics = DEV_BASICS.filter(x => fitAge(x, m)).map(x => x.id);
+  if (saved && Array.isArray(saved.items) && saved.items.length) return saved.items.filter(id => DEV_ALL.some(x => x.id === id));
+  const h = hashStr(key), ideas = [];
+  for (let k = 0; ideas.length < 3 && k < DEV_ROT.length * 2; k++) {
+    const cat = DEV_ROT[(h + k * 2 + Math.floor(k / 3)) % DEV_ROT.length];
+    const pool = DEV_IDEAS.filter(x => x.c === cat && fitAge(x, m) && !ideas.includes(x.id));
+    if (pool.length && !ideas.some(id => DEV_IDEAS.find(x => x.id === id).c === cat)) ideas.push(pool[hashStr(key + cat) % pool.length].id);
+  }
+  return basics.concat(ideas);
+}
+function devDone(key = dayKey()) { const d = state.devDays[key]; return (d && d.done) || {}; }
+async function devToggle(id) {
+  if (!state.canWrite) { toast("Немає права змінювати записи."); return; }
+  const key = dayKey(), items = devPlan(key), done = Object.assign({}, devDone(key)), on = !done[id];
+  if (on) done[id] = Date.now(); else delete done[id];
+  const all = items.length && items.every(x => done[x]);
+  try { await store.setDevDay(key, { items, done }); } catch (e) { return; }
+  if (on && all) toast("Усе на сьогодні зроблено! Чудовий день 🎉");
+}
+async function devSwap(id) {
+  const key = dayKey(), items = devPlan(key), it = DEV_IDEAS.find(x => x.id === id); if (!it) return;
+  const m = devAge(), pool = DEV_IDEAS.filter(x => x.c === it.c && fitAge(x, m) && !items.includes(x.id));
+  const alt = pool.length ? pool : DEV_IDEAS.filter(x => fitAge(x, m) && !items.includes(x.id));
+  if (!alt.length) { toast("Інших ідей для цього віку поки немає"); return; }
+  const nx = alt[Math.floor(Math.random() * alt.length)];
+  const done = Object.assign({}, devDone(key)); delete done[id];
+  try { await store.setDevDay(key, { items: items.map(x => x === id ? nx.id : x), done }); } catch (e) { }
+}
+function devCard() {
+  const key = dayKey(), items = devPlan(key).map(id => DEV_ALL.find(x => x.id === id)).filter(Boolean), done = devDone(key);
+  const n = items.filter(x => done[x.id]).length, p = items.length ? n / items.length : 0;
+  const week = Array.from({ length: 7 }, (_, i) => {
+    const t = Date.now() - (6 - i) * DAY, k = dayKey(t), d = state.devDays[k], cnt = d && d.done ? Object.keys(d.done).length : 0;
+    const tot = d && d.items ? d.items.length : 6, f = clamp(cnt / Math.max(1, tot), 0, 1);
+    return `<span class="wday ${i === 6 ? "now" : ""}"><i style="--f:${f.toFixed(2)}"></i>${DOW[new Date(t).getDay()]}</span>`;
+  }).join("");
+  return `<div class="card glass devday">
+    <div class="card-head"><div><h2>Заняття на сьогодні</h2><div class="muted small">${n === items.length && n ? "Усе зроблено, ви молодці!" : `Зроблено ${n} з ${items.length}`}</div></div>
+      <div class="dring" style="--p:${p.toFixed(3)}"><span>${n}/${items.length}</span></div></div>
+    <div class="checks">${items.map(x => {
+      const on = !!done[x.id], idea = x.id[0] === "i";
+      return `<div class="chk ${on ? "on" : ""}" data-chk="${x.id}" role="checkbox" aria-checked="${on}" tabindex="0">
+        <span class="box">${on ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</span>
+        <span class="txt"><b>${esc(x.t)}</b><span class="muted small">${esc(x.d)}</span></span>
+        <span class="cat" title="${DEV_CATS[x.c][1]}">${DEV_CATS[x.c][0]}</span>
+        ${idea && !on ? `<button class="swap" data-swap="${x.id}" aria-label="Інша ідея" title="Інша ідея"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6M4 20v-4.5h4.5"/></svg></button>` : ""}
+      </div>`;
+    }).join("")}</div>
+    <div class="dweek">${week}</div>
+  </div>`;
+}
+
+/* ---------- development: milestones ---------- */
+const SKILLS = [
+  { id: "s_crawl", c: "move", t: "Повзає на руках і колінах", m: [5, 14] },
+  { id: "s_pullup", c: "move", t: "Встає, тримаючись за опору", m: [6, 13] },
+  { id: "s_cruise", c: "move", t: "Ходить уздовж меблів", m: [7, 14] },
+  { id: "s_stand", c: "move", t: "Стоїть без опори", m: [7, 17] },
+  { id: "s_walk", c: "move", t: "Ходить сам", m: [8, 18] },
+  { id: "s_squat", c: "move", t: "Присідає й підводиться без опори", m: [12, 20] },
+  { id: "s_climb", c: "move", t: "Залазить на диван чи низьке крісло", m: [12, 22] },
+  { id: "s_run", c: "move", t: "Бігає", m: [16, 26] },
+  { id: "s_kick", c: "move", t: "Штовхає мʼяч ногою", m: [18, 28] },
+  { id: "s_jump", c: "move", t: "Стрибає на двох ногах", m: [22, 34] },
+  { id: "s_pincer", c: "hands", t: "Бере дрібне двома пальцями", m: [8, 13] },
+  { id: "s_inbox", c: "hands", t: "Кладе предмети в коробку", m: [10, 16] },
+  { id: "s_tower2", c: "hands", t: "Ставить кубик на кубик", m: [12, 20] },
+  { id: "s_scribble", c: "hands", t: "Малює каракулі", m: [12, 22] },
+  { id: "s_cup", c: "hands", t: "Пʼє з відкритої чашки", m: [12, 22] },
+  { id: "s_spoon", c: "hands", t: "Їсть ложкою сам", m: [15, 26] },
+  { id: "s_tower4", c: "hands", t: "Будує вежу з 4 кубиків", m: [18, 28] },
+  { id: "s_bye", c: "talk", t: "Махає «па-па»", m: [8, 14] },
+  { id: "s_mama", c: "talk", t: "Кличе маму чи тата словом", m: [9, 15] },
+  { id: "s_point", c: "talk", t: "Показує пальцем, що хоче", m: [9, 15] },
+  { id: "s_word1", c: "talk", t: "Перше слово, крім «мама» й «тато»", m: [11, 18] },
+  { id: "s_simple", c: "talk", t: "Виконує просте прохання без жесту", m: [12, 20] },
+  { id: "s_bodypart", c: "talk", t: "Показує частину тіла, коли питаєте", m: [14, 22] },
+  { id: "s_words10", c: "talk", t: "Каже 10 і більше слів", m: [15, 24] },
+  { id: "s_2words", c: "talk", t: "Поєднує два слова: «мама дай»", m: [18, 30] },
+  { id: "s_words50", c: "talk", t: "Каже близько 50 слів", m: [20, 30] },
+  { id: "s_peek", c: "feel", t: "Грає в «ку-ку»", m: [7, 13] },
+  { id: "s_show", c: "feel", t: "Приносить показати іграшку", m: [12, 18] },
+  { id: "s_imitate", c: "feel", t: "Наслідує домашні справи", m: [12, 20] },
+  { id: "s_helpdress", c: "feel", t: "Допомагає вдягатися: простягає руку чи ніжку", m: [12, 20] },
+  { id: "s_parallel", c: "feel", t: "Грається поруч з іншими дітьми", m: [18, 30] },
+  { id: "s_hidden", c: "think", t: "Шукає сховану іграшку", m: [8, 13] },
+  { id: "s_use", c: "think", t: "Знає, для чого речі: телефон до вуха, гребінець до волосся", m: [11, 18] },
+  { id: "s_picture", c: "think", t: "Показує на картинці, коли називаєте", m: [14, 22] },
+  { id: "s_feeddoll", c: "think", t: "Годує ляльку чи ведмедика", m: [15, 24] },
+  { id: "s_shapes", c: "think", t: "Вкладає просту фігуру в сортер", m: [16, 26] },
+  { id: "s_sort", c: "think", t: "Сортує за кольором або формою", m: [24, 36] },
+];
+const fmtDay = ms => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_G[d.getMonth()]}`; };
+function skillsCard() {
+  const m = devAge(), sk = state.skills;
+  const now = SKILLS.filter(s => !sk[s.id] && s.m[0] <= m + 2 && s.m[1] >= m - 3).sort((a, b) => a.m[0] - b.m[0]).slice(0, 5);
+  const recent = SKILLS.filter(s => sk[s.id]).sort((a, b) => (sk[b.id].at || 0) - (sk[a.id].at || 0)).slice(0, 3);
+  const row = s => { const on = !!sk[s.id]; return `<div class="chk sk ${on ? "on" : ""}" data-skill="${s.id}" role="checkbox" aria-checked="${on}" tabindex="0"><span class="box">${on ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</span><span class="txt"><b>${esc(s.t)}</b><span class="muted small">${on ? `уміє з ${fmtDay(sk[s.id].at)}` : `зазвичай у ${s.m[0]}–${s.m[1]} міс`}</span></span><span class="cat">${DEV_CATS[s.c][0]}</span></div>`; };
+  return `<div class="card glass">
+    <div class="card-head"><h2>Що вже вміє</h2><button class="btn sm ghost" data-act="skills">Усі етапи</button></div>
+    <p class="muted small" style="margin:0 0 10px">Позначайте, коли зʼявляється нове. Кожна дитина росте у своєму темпі: діапазони тут широкі й лише орієнтовні.</p>
+    <div class="checks">${now.length ? now.map(row).join("") : `<div class="muted small">Для цього віку все позначено. Подивіться «Усі етапи».</div>`}</div>
+    ${recent.length ? `<div class="sec-title" style="margin:14px 4px 6px">${state.child && state.child.gender === "m" ? "Нещодавно навчився" : "Нещодавно навчилась"}</div><div class="checks">${recent.map(row).join("")}</div>` : ""}
+  </div>`;
+}
+async function skillToggle(id) {
+  if (!state.canWrite) { toast("Немає права змінювати записи."); return; }
+  const on = !!state.skills[id];
+  try { await store.setSkill(id, on ? null : { at: Date.now() }); } catch (e) { return; }
+  if (!on) toast("Записали! 🌟");
+}
+function openSkills() {
+  const m = devAge();
+  openSheet(`${sheetHead("Етапи розвитку")}<p class="muted small" style="margin:-6px 0 12px">Діапазони приблизні: багато здорових дітей роблять щось раніше або пізніше. Якщо щось турбує, поговоріть з педіатром.</p><div id="skBody"></div>`, sh => {
+    fillSkills();
+    sh.addEventListener("click", e => { const r = e.target.closest("[data-skill]"); if (r) skillToggle(r.dataset.skill); });
+  });
+}
+function fillSkills() {
+  const b = $("#skBody"); if (!b) return; const m = devAge(), sk = state.skills;
+  b.innerHTML = Object.keys(DEV_CATS).filter(c => SKILLS.some(s => s.c === c)).map(c => `<div class="sec-title">${DEV_CATS[c][0]} ${DEV_CATS[c][1]}</div><div class="checks">${SKILLS.filter(s => s.c === c).map(s => { const on = !!sk[s.id], later = !on && s.m[0] > m + 2; return `<div class="chk sk ${on ? "on" : ""} ${later ? "later" : ""}" data-skill="${s.id}" role="checkbox" aria-checked="${on}" tabindex="0"><span class="box">${on ? '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : ""}</span><span class="txt"><b>${esc(s.t)}</b><span class="muted small">${on ? `уміє з ${fmtDay(sk[s.id].at)}` : `зазвичай у ${s.m[0]}–${s.m[1]} міс${later ? " · згодом" : ""}`}</span></span></div>`; }).join("")}</div>`).join("");
+}
+
+/* ---------- development tab ---------- */
+const SAY_OPTS = [["both", "Назва і звук"], ["sound", "Лише звук"], ["none", "Тиша"]];
+const SAY_HINT = { both: "Спершу прозвучить назва, потім голос тваринки.", sound: "Одразу звучить голос тваринки, без назви.", none: "Нічого не звучить саме. Скажіть малюкові, як каже тваринка, а потім натисніть «Звук»." };
+const MODE_OPTS = [["listen", "Слухати"], ["2", "1 з 2"], ["3", "1 з 3"]];
+const MODE_HINT = { listen: "Торкніться тваринки, щоб послухати.", "2": "Звучить голос, малюк обирає одну з двох тваринок. Легкий рівень.", "3": "Звучить голос, малюк обирає одну з трьох. Трохи складніше." };
 function renderDev() {
   const mods = [["🔎", "Хто це?", "Вгадай за звуком"], ["🚂", "Транспорт", "Бі-бі, чух-чух"], ["🥁", "Інструменти", "Барабан, дудочка"], ["🎨", "Кольори й форми", "Перші поняття"]];
-  const v = $("#view-dev"), sc = v.scrollTop;
-  v.innerHTML = `<div class="wrap">${topBar("Розвиток", "Ігри для 1–5 років")}
+  const v = $("#view-dev"), sc = v.scrollTop, mode = settings.animalMode || "listen", list = zooList(), ageM = childAgeMonths();
+  v.innerHTML = `<div class="wrap">${topBar("Розвиток", "Ігри та заняття для малюка")}
+    ${devCard()}
+    ${skillsCard()}
     <div class="card glass">
       <div class="card-head"><h2>Як каже тваринка?</h2><button class="btn sm ghost" data-act="animals">Налаштувати</button></div>
-      <p class="muted small" style="margin:0">Торкніться тваринки: прозвучить назва, а потім її голос.</p>
-      <div class="agrid">${ANIMALS.map((a, i) => `<button class="acard" style="--abg:${a.bg}" data-animal="${i}"><span class="art">${animalArt(a.id)}</span>${a.n}</button>`).join("")}</div>
+      <div class="seg" id="anMode"><span class="pill"></span>${MODE_OPTS.map(([k, t]) => `<button data-v="${k}" class="${mode === k ? "on" : ""}">${t}</button>`).join("")}</div>
+      <p class="muted small" id="anModeHint" style="margin:10px 2px 0">${MODE_HINT[mode]}</p>
+      <button class="btn quiz-go ${mode === "listen" ? "hidden" : ""}" id="quizGo" data-act="quiz">▶ Грати: хто так каже?</button>
+      <div class="agrid">${list.map(a => `<button class="acard" style="--abg:${a.bg}" data-animal="${a.id}"><span class="art">${animalArt(a.id)}</span>${esc(a.n)}</button>`).join("")}</div>
+      ${ageM != null && ageM < 18 ? `<p class="muted small" style="margin:12px 2px 0">До півтора року лікарі радять екран лише разом із дорослим і ненадовго: кілька хвилин гри, а далі повторюйте звуки без телефона.</p>` : ""}
     </div>
     <div class="dev-grid">${mods.map(([e, t, s]) => `<button class="dev-card glass" data-act="soon"><span class="soon">скоро</span><span class="em">${e}</span><span><b>${t}</b><br><span class="muted small">${s}</span></span></button>`).join("")}</div>
   </div>`;
   v.scrollTop = sc;
+  const seg = $("#anMode", v);
+  if (seg) initSeg(seg, k => { settings.animalMode = k; LS.set("settings", settings); const h = $("#anModeHint"); if (h) h.textContent = MODE_HINT[k]; const g = $("#quizGo"); if (g) g.classList.toggle("hidden", k === "listen"); });
 }
+document.addEventListener("click", e => {
+  const sw = e.target.closest("[data-swap]"); if (sw) { e.stopPropagation(); devSwap(sw.dataset.swap); return; }
+  const c = e.target.closest("[data-chk]"); if (c) { devToggle(c.dataset.chk); return; }
+  const s = e.target.closest("#view-dev [data-skill]"); if (s) { skillToggle(s.dataset.skill); return; }
+});
+document.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && e.target.matches && e.target.matches("[data-chk],[data-skill]")) { e.preventDefault(); e.target.click(); } });
 
 /* ---------- media helpers ---------- */
 async function fileToImage(file, size, fmt) {
@@ -1732,63 +2006,154 @@ function speak(text) {
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-/* ---------- animal stage ---------- */
-let stageIdx = 0;
-function openStage(i) {
-  closeStage(true);
-  stageIdx = (i + ANIMALS.length) % ANIMALS.length;
-  const a = ANIMALS[stageIdx];
-  const el = document.createElement("div"); el.id = "stage"; el.style.setProperty("--abg", a.bg);
-  el.innerHTML = `<button class="icon-btn glass stage-close" data-stage="close" aria-label="Закрити">${ICON.close}</button>
-    <button class="stage-art art" data-stage="again" aria-label="Ще раз" style="max-width:none">${animalArt(a.id)}</button>
-    <div class="stage-name">${a.n}</div><div class="stage-says">${a.s}</div><div class="stage-note" id="stageNote"></div>
-    <div class="stage-nav"><button class="icon-btn glass" data-stage="prev" aria-label="Попередня"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <button class="icon-btn glass" data-stage="again" aria-label="Ще раз"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg></button>
-    <button class="icon-btn glass" data-stage="next" aria-label="Наступна"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;
-  document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.add("show"));
-  el.addEventListener("click", e => { const b = e.target.closest("[data-stage]"); if (!b) return; const k = b.dataset.stage; if (k === "close") closeStage(); else if (k === "prev") openStage(stageIdx - 1); else if (k === "next") openStage(stageIdx + 1); else sayAnimal(a); });
-  let x0 = null; el.addEventListener("touchstart", e => x0 = e.touches[0].clientX, { passive: true });
-  el.addEventListener("touchend", e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) openStage(stageIdx + (dx < 0 ? 1 : -1)); });
-  sayAnimal(a);
+/* ---------- animals: list with own additions ---------- */
+const ZOO_BG = ["#e3f0ff", "#fff0d9", "#ffe7d9", "#ffe4ec", "#fff5d1", "#e6f5e9", "#efeafa", "#e4f6df", "#f2e8dc", "#e0f1ff"];
+function zooAll() {
+  const z = state.zoo || {};
+  const base = ANIMALS.map(a => { const o = z[a.id] || {}; return Object.assign({}, a, { n: o.n || a.n, s: o.s || a.s, bg: o.bg || a.bg, hidden: !!o.hidden, base: true }); });
+  const own = Object.keys(z).filter(id => z[id] && z[id].custom).map(id => { const o = z[id]; return { id, n: o.n || "Тваринка", s: o.s || "", bg: o.bg || ZOO_BG[6], emo: o.emo || "", hidden: !!o.hidden, custom: true, at: o.at || 0 }; }).sort((a, b) => a.at - b.at);
+  return base.concat(own);
 }
-function closeStage(instant) { stopClip(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
-async function sayAnimal(a) {
+const zooList = () => zooAll().filter(a => !a.hidden);
+const zooGet = id => zooAll().find(a => a.id === id);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ---------- animal voice ---------- */
+async function playName(a) { if (isClip(state.animals.voice[a.id])) return playClip("voice", a.id); if (settings.tts) return speak(a.n); return false; }
+async function playSound(a) { if (isClip(state.animals.snd[a.id])) return playClip("snd", a.id); if (a.s) return speak(a.s.replace(/!/g, "")); return false; }
+async function runSay(a, what) {
   stopClip(); const tok = Game.tok;
   Sound.ensure(); Sound.unlockHtml();
   const art = $("#stage .stage-art"), note = $("#stageNote");
-  const hasV = isClip(state.animals.voice[a.id]), hasS = isClip(state.animals.snd[a.id]);
-  if (note) note.textContent = !hasS ? "Звук тваринки ще не додано. Його можна завантажити в налаштуваннях." : "";
   try {
     art && art.classList.add("talk");
-    if (hasV) await playClip("voice", a.id); else if (settings.tts) await speak(a.n);
-    if (tok !== Game.tok) return;
-    if (hasS) { await wait(250); if (tok !== Game.tok) return; await playClip("snd", a.id); }
-    else if (!hasV) await speak(a.s.replace(/!/g, ""));
+    if (what !== "sound") { await playName(a); if (tok !== Game.tok) return; }
+    if (what !== "name") { if (what === "both") await wait(250); if (tok !== Game.tok) return; await playSound(a); }
   } catch (e) { if (note) note.textContent = "Не вдалося відтворити звук."; }
   finally { if (tok === Game.tok && art) art.classList.remove("talk"); }
 }
-document.addEventListener("click", e => { const c = e.target.closest("[data-animal]"); if (c) openStage(+c.dataset.animal); });
+
+/* ---------- animal stage (listen) ---------- */
+let stageList = [], stageIdx = 0;
+function openStage(id) { stageList = zooList(); const i = stageList.findIndex(a => a.id === id); showStage(i < 0 ? 0 : i); }
+function showStage(i) {
+  closeStage(true);
+  if (!stageList.length) return;
+  stageIdx = (i + stageList.length) % stageList.length;
+  const a = stageList[stageIdx], say = settings.say || "both";
+  const hasS = isClip(state.animals.snd[a.id]);
+  const el = document.createElement("div"); el.id = "stage"; el.style.setProperty("--abg", a.bg);
+  el.innerHTML = `<button class="icon-btn glass stage-close" data-stage="close" aria-label="Закрити">${ICON.close}</button>
+    <button class="stage-art art" data-stage="again" aria-label="Ще раз" style="max-width:none">${animalArt(a.id)}</button>
+    <div class="stage-name">${esc(a.n)}</div>${a.s ? `<div class="stage-says">${esc(a.s)}</div>` : ""}
+    <div class="stage-note" id="stageNote">${say === "none" ? `Скажіть малюкові, як каже ${esc(a.n.toLowerCase())}, а потім натисніть «Звук».` : !hasS && a.custom ? "Свого звуку ще немає: телефон прочитає текст. Звук можна додати в налаштуваннях." : !hasS ? "Звук тваринки ще не додано. Його можна завантажити в налаштуваннях." : ""}</div>
+    <div class="stage-nav"><button class="icon-btn glass" data-stage="prev" aria-label="Попередня"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="pill-btn glass" data-stage="name" aria-label="Назва"><svg viewBox="0 0 24 24"><path d="M5 18v-1a5 5 0 0 1 5-5h0a5 5 0 0 1 5 5v1M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 8a4 4 0 0 1 0 6M20.5 5.5a7.5 7.5 0 0 1 0 11"/></svg>Назва</button>
+    <button class="pill-btn glass" data-stage="sound" aria-label="Звук"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>Звук</button>
+    <button class="icon-btn glass" data-stage="next" aria-label="Наступна"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  el.addEventListener("click", e => {
+    const b = e.target.closest("[data-stage]"); if (!b) return; const k = b.dataset.stage;
+    if (k === "close") closeStage(); else if (k === "prev") showStage(stageIdx - 1); else if (k === "next") showStage(stageIdx + 1);
+    else if (k === "name") runSay(a, "name"); else if (k === "sound") runSay(a, "sound");
+    else runSay(a, (settings.say || "both") === "none" ? "sound" : settings.say || "both");
+  });
+  let x0 = null; el.addEventListener("touchstart", e => x0 = e.touches[0].clientX, { passive: true });
+  el.addEventListener("touchend", e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) showStage(stageIdx + (dx < 0 ? 1 : -1)); });
+  if (say !== "none") runSay(a, say);
+}
+function closeStage(instant) { stopClip(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
+document.addEventListener("click", e => { const c = e.target.closest("[data-animal]"); if (c) openStage(c.dataset.animal); });
+
+/* ---------- animal quiz: one of two / one of three ---------- */
+const Quiz = { k: 2, target: null, score: 0, last: null, busy: false };
+function openQuiz(k) {
+  k = k === 3 ? 3 : 2;
+  const list = zooList(); if (list.length < k) { toast(`Для гри потрібно щонайменше ${k} тваринки`); return; }
+  closeStage(true); Object.assign(Quiz, { k, score: 0, last: null, busy: false });
+  const el = document.createElement("div"); el.id = "stage"; el.className = "quiz";
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  el.addEventListener("click", e => {
+    const b = e.target.closest("[data-q]"); if (!b) return; const k = b.dataset.q;
+    if (k === "close") closeStage(); else if (k === "hear") quizHear(); else if (k === "pick") quizPick(b);
+  });
+  quizRound();
+}
+function quizRound() {
+  const el = $("#stage.quiz"); if (!el) return;
+  const list = zooList(); if (list.length < Quiz.k) { closeStage(); return; }
+  const pool = list.filter(a => a.id !== Quiz.last), t = pool[Math.floor(Math.random() * pool.length)];
+  Quiz.last = t.id; Quiz.target = t; Quiz.busy = false;
+  const opts = shuffle([t].concat(shuffle(list.filter(a => a.id !== t.id)).slice(0, Quiz.k - 1)));
+  const says = (t.s || "").replace(/!+$/, "");
+  el.innerHTML = `<button class="icon-btn glass stage-close" data-q="close" aria-label="Закрити">${ICON.close}</button>
+    <div class="quiz-score" aria-label="Відгадано">⭐ ${Quiz.score}</div>
+    <div class="quiz-q">Хто каже${says ? `<br><b>«${esc(says)}»</b>` : " так"}?</div>
+    <button class="pill-btn glass quiz-hear" data-q="hear"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>Послухати</button>
+    <div class="quiz-opts k${Quiz.k}">${opts.map(a => `<button class="qopt" data-q="pick" data-id="${a.id}" style="--abg:${a.bg}"><span class="art">${animalArt(a.id)}</span><span class="qn">${esc(a.n)}</span></button>`).join("")}</div>
+    <div class="stage-note" id="stageNote">${(settings.say || "both") === "none" ? "Спитайте малюка самі або натисніть «Послухати»." : ""}</div>`;
+  if ((settings.say || "both") !== "none") setTimeout(() => { if ($("#stage.quiz") && Quiz.target === t) quizHear(); }, 450);
+}
+async function quizHear() { const t = Quiz.target; if (!t) return; stopClip(); Sound.ensure(); Sound.unlockHtml(); try { await playSound(t); } catch (e) { } }
+async function quizPick(b) {
+  if (Quiz.busy) return; const t = Quiz.target, el = $("#stage.quiz"); if (!t || !el) return;
+  if (b.dataset.id === t.id) {
+    Quiz.busy = true; Quiz.score++; stopClip(); const tok = Game.tok;
+    b.classList.add("right"); $$(".qopt", el).forEach(x => x !== b && x.classList.add("fade"));
+    const sc = $(".quiz-score", el); if (sc) { sc.textContent = `⭐ ${Quiz.score}`; sc.classList.remove("bump"); void sc.offsetWidth; sc.classList.add("bump"); }
+    b.insertAdjacentHTML("beforeend", `<span class="burst">${"<i></i>".repeat(8)}</span>`);
+    try { navigator.vibrate && navigator.vibrate(30); } catch (e) { }
+    try { Sound.ensure(); if ((settings.say || "both") !== "none") await playName(t); } catch (e) { }
+    if (tok !== Game.tok) return;
+    await wait(900); if (tok !== Game.tok || !$("#stage.quiz")) return;
+    quizRound();
+  } else {
+    b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong", "tried");
+    const note = $("#stageNote"); const a = zooGet(b.dataset.id); if (note && a) note.textContent = `Це ${a.n.toLowerCase()}. Спробуймо ще!`;
+    if ((settings.say || "both") !== "none") setTimeout(() => { if (!Quiz.busy && $("#stage.quiz") && Quiz.target === t) quizHear(); }, 600);
+  }
+}
 
 /* ---------- animal settings ---------- */
 function openAnimalsList() {
+  editingAnimal = null;
+  const say = settings.say || "both";
   openSheet(`${sheetHead("Тваринки")}
-    <div class="group" style="margin-bottom:14px"><div class="toggle-row"><span><b>Голос телефона</b><br><span class="muted small">Читати назву, якщо свого запису ще немає</span></span><button class="switch ${settings.tts ? "on" : ""}" id="anTts" aria-label="Голос телефона"></button></div></div>
-    <div class="alist" id="anList"></div>
-    <div class="disclaimer" style="margin-top:14px">Свої картинки, звуки й голос бачать і чують усі, кому відкрито застосунок.</div>`, sh => {
+    <div class="sec-title" style="margin-top:0">Коли відкриваєте тваринку</div>
+    <div class="seg" id="anSay"><span class="pill"></span>${SAY_OPTS.map(([v, t]) => `<button data-v="${v}" class="${say === v ? "on" : ""}">${t}</button>`).join("")}</div>
+    <div class="muted small" id="anSayHint" style="margin:8px 4px 0">${SAY_HINT[say]}</div>
+    <div class="group" style="margin:14px 0"><div class="toggle-row"><span><b>Голос телефона</b><br><span class="muted small">Читати назву, якщо свого запису ще немає</span></span><button class="switch ${settings.tts ? "on" : ""}" id="anTts" aria-label="Голос телефона"></button></div></div>
+    <button class="btn" id="anAdd" style="width:100%">＋ Додати тваринку</button>
+    <div class="alist" id="anList" style="margin-top:12px"></div>
+    <div class="disclaimer" style="margin-top:14px">Свої тваринки, картинки, звуки й голос бачать і чують усі, кому відкрито застосунок.</div>`, sh => {
+    initSeg($("#anSay", sh), v => { settings.say = v; LS.set("settings", settings); const h = $("#anSayHint"); if (h) h.textContent = SAY_HINT[v]; });
     $("#anTts", sh).addEventListener("click", e => { settings.tts = !settings.tts; LS.set("settings", settings); e.currentTarget.classList.toggle("on", settings.tts); });
+    $("#anAdd", sh).addEventListener("click", () => openAnimalEditor("new"));
     fillAnimalsList();
-    sh.addEventListener("click", e => { const r = e.target.closest("[data-aedit]"); if (r) openAnimalEditor(r.dataset.aedit); });
+    sh.addEventListener("click", async e => {
+      const rs = e.target.closest("[data-restore]"); if (rs) { e.stopPropagation(); await zooPatch(rs.dataset.restore, { hidden: false }); toast("Тваринку повернуто"); return; }
+      const r = e.target.closest("[data-aedit]"); if (r) openAnimalEditor(r.dataset.aedit);
+    });
   });
 }
 function fillAnimalsList() {
   const l = $("#anList"); if (!l) return;
   const mark = (ok, t) => `<span class="chip ${ok ? "ok" : ""}" style="font-size:11px;padding:3px 8px">${ok ? "✓ " : ""}${t}</span>`;
-  l.innerHTML = ANIMALS.map(a => `<button class="arow" data-aedit="${a.id}"><span class="art">${animalArt(a.id)}</span><span style="flex:1;min-width:0"><b>${a.n}</b><span class="btn-row" style="gap:4px;margin-top:3px">${mark(!!state.animals.img[a.id], "картинка")}${mark(isClip(state.animals.snd[a.id]), "звук")}${mark(isClip(state.animals.voice[a.id]), "голос")}</span></span></button>`).join("");
+  const all = zooAll(), vis = all.filter(a => !a.hidden), gone = all.filter(a => a.hidden);
+  l.innerHTML = vis.map(a => `<button class="arow" data-aedit="${a.id}"><span class="art" style="background:${a.bg};border-radius:14px">${animalArt(a.id)}</span><span style="flex:1;min-width:0"><b>${esc(a.n)}${a.custom ? ' <span class="muted small">· своя</span>' : ""}</b><span class="btn-row" style="gap:4px;margin-top:3px">${mark(!!state.animals.img[a.id] || (a.base && ANIMAL_PIC_IDS.has(a.id)), "картинка")}${mark(isClip(state.animals.snd[a.id]), "звук")}${mark(isClip(state.animals.voice[a.id]), "голос")}</span></span></button>`).join("")
+    + (gone.length ? `<div class="sec-title">Видалені</div>` + gone.map(a => `<div class="arow gone"><span class="art">${animalArt(a.id)}</span><b style="flex:1">${esc(a.n)}</b><button class="btn sm ghost" data-restore="${a.id}">Повернути</button></div>`).join("") : "");
+}
+async function zooPatch(id, patch) {
+  const cur = Object.assign({}, (state.zoo || {})[id] || {}); Object.assign(cur, patch);
+  Object.keys(cur).forEach(k => { if (cur[k] === "" || cur[k] === false || cur[k] == null) delete cur[k]; });
+  if (cur.custom === undefined && (state.zoo[id] || {}).custom) cur.custom = true;
+  await store.setZoo(id, Object.keys(cur).length ? cur : null);
 }
 let editingAnimal = null;
 function openAnimalEditor(id) {
-  const a = ANIMALS.find(x => x.id === id); if (!a) return;
+  if (id !== "new" && !zooGet(id)) return;
   editingAnimal = id;
   openSheet(`<div class="sheet-head"><button class="btn sm ghost" data-back>‹ Тваринки</button><button class="icon-btn" style="background:var(--line)" data-close aria-label="Закрити">${ICON.close}</button></div><div id="aeBody"></div>`, sh => {
     $("[data-back]", sh).addEventListener("click", () => { editingAnimal = null; openAnimalsList(); });
@@ -1797,22 +2162,65 @@ function openAnimalEditor(id) {
 }
 function fillAnimalEditor() {
   const body = $("#aeBody"); if (!body || !editingAnimal) return;
-  const a = ANIMALS.find(x => x.id === editingAnimal);
+  const isNew = editingAnimal === "new";
+  const a = isNew ? { id: "", n: "", s: "", bg: ZOO_BG[Math.floor(Math.random() * ZOO_BG.length)], emo: "", custom: true } : zooGet(editingAnimal);
+  if (!a) { editingAnimal = null; openAnimalsList(); return; }
+  const keepVals = body.dataset.for === (a.id || "new") ? { n: ($("#aeN") || {}).value, s: ($("#aeS") || {}).value, e: ($("#aeE") || {}).value, bg: body.dataset.bg } : null;
+  body.dataset.for = a.id || "new";
+  const bg = (keepVals && keepVals.bg) || a.bg; body.dataset.bg = bg;
   const img = state.animals.img[a.id], snd = state.animals.snd[a.id], vo = state.animals.voice[a.id];
   const box = (kind, title, c, hint) => `<div class="media-box"><div class="mh"><span>${title}</span><span class="muted small">${isClip(c) ? `${String(c.dur || "").replace(".", ",")} с` : "не додано"}</span></div>
     <div class="muted small">${hint}</div>
     <div class="btn-row"><label class="btn sm" for="ae_${kind}">${isClip(c) ? "Замінити" : "Завантажити"}</label><input class="vh" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" id="ae_${kind}" data-kind="${kind}">
     ${isClip(c) ? `<button class="btn sm ghost" data-play="${kind}">▶ Прослухати</button><button class="btn sm danger" data-del="${kind}">Видалити</button>` : ""}</div></div>`;
-  body.innerHTML = `<div class="photo-row" style="margin-bottom:14px"><span class="art" style="width:110px;max-width:110px;flex:none;border-radius:22px;background:${a.bg}">${animalArt(a.id)}</span>
-      <div><h2 style="font-size:24px">${a.n}</h2><div class="muted">${a.s}</div></div></div>
+  const nm = a.n || "тваринку";
+  body.innerHTML = `<div class="photo-row" style="margin-bottom:14px"><span class="art" id="aePrev" style="width:110px;max-width:110px;flex:none;border-radius:22px;background:${bg}">${isNew ? `<span class="emo">${esc((keepVals && keepVals.e) || "🐾")}</span>` : animalArt(a.id)}</span>
+      <div><h2 style="font-size:24px">${isNew ? "Нова тваринка" : esc(a.n)}</h2><div class="muted">${esc(a.s)}</div></div></div>
+    <form class="form" id="aeForm">
+      <div class="field"><label for="aeN">Назва</label><input class="input" id="aeN" maxlength="24" required placeholder="Наприклад, Зайчик" value="${esc(keepVals ? keepVals.n : a.n)}"></div>
+      <div class="field"><label for="aeS">Як каже</label><input class="input" id="aeS" maxlength="30" placeholder="Наприклад, Пі-пі-пі!" value="${esc(keepVals ? keepVals.s : a.s)}"></div>
+      ${a.custom ? `<div class="field"><label for="aeE">Значок, поки немає картинки</label><input class="input" id="aeE" maxlength="4" placeholder="🐰" value="${esc(keepVals ? keepVals.e : a.emo)}"></div>` : ""}
+      <div class="field"><label>Колір картки</label><div class="swatches" id="aeBg">${ZOO_BG.map(c => `<button type="button" class="sw ${c === bg ? "on" : ""}" data-bg="${c}" style="background:${c}" aria-label="Колір"></button>`).join("")}</div></div>
+      <button class="btn" type="submit">${isNew ? "Додати тваринку" : "Зберегти"}</button>
+    </form>
+    ${isNew ? `<p class="muted small" style="margin:12px 4px 0">Картинку, звук і голос назви можна буде додати одразу після збереження.</p>` : `
+    <div class="sec-title">Картинка й звуки</div>
     <div class="form">
-      <div class="media-box"><div class="mh"><span>Картинка</span><span class="muted small">${img ? "своя" : "стандартна"}</span></div>
-        <div class="btn-row"><label class="btn sm" for="ae_img">Завантажити свою</label><input class="vh" type="file" accept="image/*" id="ae_img">${img ? `<button class="btn sm ghost" data-del="img">Повернути стандартну</button>` : ""}</div></div>
-      ${box("snd", "Звук тваринки", snd, `Підійде короткий запис до 8 с: mp3, m4a або wav. На Pixabay шукайте «${a.q}».`)}
-      ${box("voice", "Голос назви", vo, `Запишіть «${a.n}» у «Диктофоні» на iPhone і оберіть файл. Тишу на початку й у кінці застосунок обріже сам.`)}
-      <div id="aeMsg" class="small muted" style="min-height:1.2em"></div>
-    </div>`;
+      <div class="media-box"><div class="mh"><span>Картинка</span><span class="muted small">${img ? "своя" : a.custom ? "не додано" : "стандартна"}</span></div>
+        <div class="btn-row"><label class="btn sm" for="ae_img">${img ? "Замінити" : "Завантажити свою"}</label><input class="vh" type="file" accept="image/*" id="ae_img">${img ? `<button class="btn sm ghost" data-del="img">${a.custom ? "Прибрати" : "Повернути стандартну"}</button>` : ""}</div></div>
+      ${box("snd", "Звук тваринки", snd, `Короткий запис до 8 с: mp3, m4a або wav.${a.q ? ` На Pixabay шукайте «${a.q}».` : ""}`)}
+      ${box("voice", "Голос назви", vo, `Запишіть «${esc(nm)}» у «Диктофоні» й оберіть файл. Тишу на початку й у кінці застосунок обріже сам.`)}
+    </div>
+    <button class="btn danger" id="aeRemove" style="width:100%;margin-top:18px">${a.custom ? "Видалити тваринку" : "Прибрати з гри"}</button>
+    ${a.base && (state.zoo[a.id] || {}).n ? `<button class="btn ghost" id="aeReset" style="width:100%;margin-top:8px">Повернути стандартну назву</button>` : ""}`}
+    <div id="aeMsg" class="small muted" style="min-height:1.2em;margin-top:8px"></div>`;
   const msg = t => { const m = $("#aeMsg"); if (m) m.textContent = t; };
+  $$("#aeBg [data-bg]", body).forEach(b => b.addEventListener("click", () => { body.dataset.bg = b.dataset.bg; $$("#aeBg .sw", body).forEach(x => x.classList.toggle("on", x === b)); const p = $("#aePrev"); if (p) p.style.background = b.dataset.bg; }));
+  const eIn = $("#aeE"); if (eIn && isNew) eIn.addEventListener("input", () => { const p = $("#aePrev .emo"); if (p) p.textContent = eIn.value || "🐾"; });
+  $("#aeForm", body).addEventListener("submit", async e => {
+    e.preventDefault();
+    const n = $("#aeN").value.trim(), s = $("#aeS").value.trim(), emo = eIn ? eIn.value.trim() : "", bgv = body.dataset.bg;
+    if (!n) { msg("Вкажіть назву."); return; }
+    try {
+      if (isNew) {
+        const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+        await store.setZoo(id, { custom: true, n, s, emo, bg: bgv, at: Date.now() });
+        editingAnimal = id; body.dataset.for = ""; fillAnimalEditor(); toast("Тваринку додано");
+      } else if (a.custom) { await zooPatch(a.id, { n, s, emo, bg: bgv }); body.dataset.for = ""; toast("Збережено"); }
+      else { const base = ANIMALS.find(x => x.id === a.id); await zooPatch(a.id, { n: n === base.n ? "" : n, s: s === base.s ? "" : s, bg: bgv === base.bg ? "" : bgv }); body.dataset.for = ""; toast("Збережено"); }
+    } catch (err) { }
+  });
+  if (isNew) return;
+  const rm = $("#aeRemove");
+  rm && rm.addEventListener("click", async () => {
+    if (!rm.dataset.sure) { rm.dataset.sure = "1"; rm.textContent = a.custom ? "Точно видалити разом зі звуками?" : "Точно прибрати? Повернути можна в списку"; return; }
+    try {
+      if (a.custom) { await store.setZoo(a.id, null); for (const k of ["img", "snd", "voice"]) if (state.animals[k][a.id]) await store.setAnimal(k, a.id, null); toast("Тваринку видалено"); }
+      else { await zooPatch(a.id, { hidden: true }); toast("Тваринку прибрано з гри"); }
+      editingAnimal = null; openAnimalsList();
+    } catch (e) { }
+  });
+  const rs = $("#aeReset"); rs && rs.addEventListener("click", async () => { try { await zooPatch(a.id, { n: "", s: "" }); body.dataset.for = ""; toast("Назву повернуто"); } catch (e) { } });
   $("#ae_img").addEventListener("change", async e => {
     const f = e.target.files && e.target.files[0]; if (!f) return; msg("Обробляю картинку…");
     try { const data = await fileToImage(f, 300, /png|webp|gif/.test(f.type) ? "png" : "jpeg"); await store.setAnimal("img", a.id, { data, at: Date.now() }); msg(""); toast("Картинку збережено"); } catch (err) { msg(err && err.code ? "" : "Не вдалося відкрити цю картинку."); }
@@ -1828,7 +2236,7 @@ function fillAnimalEditor() {
     try { await store.setAnimal(b.dataset.del, a.id, null); toast("Видалено"); } catch (e) { }
   }));
 }
-function onAnimalsChanged() { if (state.tab === "dev") renderDev(); else renderDev(); fillAnimalsList(); fillAnimalEditor(); }
+function onAnimalsChanged() { renderDev(); fillAnimalsList(); fillAnimalEditor(); }
 
 function renderAll() { renderHome(); renderSleep(); if (state.loaded || store.mode === "local") renderDev(); }
 
@@ -2073,7 +2481,7 @@ function openProfile() {
     <div class="seg" id="stGlass"><span class="pill"></span>${GLASS.map(([v, t]) => `<button data-v="${v}" class="${settings.glass === v ? "on" : ""}">${t}</button>`).join("")}</div>
 
     <button type="button" class="signout" onclick="window.__signOut&&window.__signOut()">Вийти з акаунта</button>
-    <div class="disclaimer" style="margin-top:10px">Сплюшка · v0.8.1 · безкоштовно і без реклами</div>
+    <div class="disclaimer" style="margin-top:10px">Сплюшка · v0.9 · безкоштовно і без реклами</div>
   `, sh => {
     let gender = c.gender || "";
     initSeg($("#pfGender", sh), v => gender = v);
@@ -2114,6 +2522,8 @@ document.addEventListener("click", async e => {
   if (act === "profile") openProfile();
   else if (act === "theme") switchTheme(isDark() ? "light" : "dark");
   else if (act === "animals") openAnimalsList();
+  else if (act === "quiz") openQuiz(+(settings.animalMode || 2));
+  else if (act === "skills") openSkills();
   else if (act === "add") openEdit(null);
   else if (act === "tips") { state.sleepSeg = "tips"; renderSleep(); setTab("sleep"); }
   else if (act === "soon") toast("Цей розділ у розробці");
