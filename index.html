@@ -1804,9 +1804,23 @@ const isImgData = v => typeof v === "string" && /^data:image\/(png|jpe?g|webp);b
 const isClip = v => v && typeof v.data === "string" && /^[A-Za-z0-9+/=]+$/.test(v.data);
 /* illustrated animal faces: img/animals/<id>.webp (384px, transparent) */
 const ANIMAL_PIC_IDS = new Set(["cow", "dog", "cat", "pig", "hen", "rooster", "horse", "sheep", "duck", "goat", "frog", "bird"]);
+/* extra bundled faces for animals the family adds themselves: matched by name (or emoji) */
+const EXTRA_PICS = [
+  ["donkey", /^(осл|ослик|віслю)/, "🫏"], ["tiger", /^тигр/, "🐯🐅"], ["lion", /^лев/, "🦁"],
+  ["squirrel", /^біл[коч]/, "🐿"], ["chick", /^(курч|ципл|ціпл|ципо|ціпо|пташен)/, "🐤🐥🐣"], ["wolf", /^вов[кч]/, "🐺"],
+  ["bunny", /^(зай|крол|кріл)/, "🐰🐇"], ["hedgehog", /^їжа/, "🦔"], ["hamster", /^хом/, "🐹"],
+];
+function animalPicId(id) {
+  if (ANIMAL_PIC_IDS.has(id)) return id;
+  const z = (state.zoo || {})[id]; if (!z || !z.custom) return null;
+  const n = String(z.n || "").toLowerCase().replace(/[ʼ'’`]/g, "").trim(), e = String(z.emo || "");
+  const hit = EXTRA_PICS.find(([, re]) => re.test(n)) || (e && EXTRA_PICS.find(([, , em]) => [...em].some(c => c.length > 0 && e.includes(c))));
+  return hit ? hit[0] : null;
+}
 function animalArt(id) {
   const c = state.animals.img[id]; if (c && isImgData(c.data)) return `<img src="${esc(c.data)}" alt="">`;
-  if (ANIMAL_PIC_IDS.has(id)) return `<img class="pic" src="img/animals/${id}.webp" alt="" decoding="async" draggable="false">`;
+  const pic = animalPicId(id);
+  if (pic) return `<img class="pic" src="img/animals/${pic}.webp" alt="" decoding="async" draggable="false">`;
   if (ANIMAL_SVG[id]) return ANIMAL_SVG[id];
   const z = (state.zoo || {})[id] || {}; return `<span class="emo">${esc(z.emo || ((z.n || "?").trim()[0] || "?").toUpperCase())}</span>`;
 }
@@ -2526,7 +2540,7 @@ function fillAnimalsList() {
   const l = $("#anList"); if (!l) return;
   const mark = (ok, t) => `<span class="chip ${ok ? "ok" : ""}" style="font-size:11px;padding:3px 8px">${ok ? "✓ " : ""}${t}</span>`;
   const all = zooAll(), vis = all.filter(a => !a.hidden), gone = all.filter(a => a.hidden);
-  l.innerHTML = vis.map(a => `<button class="arow" data-aedit="${a.id}"><span class="art" style="background:${a.bg};border-radius:14px">${animalArt(a.id)}</span><span style="flex:1;min-width:0"><b>${esc(a.n)}${a.custom ? ' <span class="muted small">· своя</span>' : ""}</b><span class="btn-row" style="gap:4px;margin-top:3px">${mark(!!state.animals.img[a.id] || (a.base && ANIMAL_PIC_IDS.has(a.id)), "картинка")}${mark(isClip(state.animals.snd[a.id]), "звук")}${mark(isClip(state.animals.voice[a.id]), "голос")}</span></span></button>`).join("")
+  l.innerHTML = vis.map(a => `<button class="arow" data-aedit="${a.id}"><span class="art" style="background:${a.bg};border-radius:14px">${animalArt(a.id)}</span><span style="flex:1;min-width:0"><b>${esc(a.n)}${a.custom ? ' <span class="muted small">· своя</span>' : ""}</b><span class="btn-row" style="gap:4px;margin-top:3px">${mark(!!state.animals.img[a.id] || !!animalPicId(a.id), "картинка")}${mark(isClip(state.animals.snd[a.id]), "звук")}${mark(isClip(state.animals.voice[a.id]), "голос")}</span></span></button>`).join("")
     + (gone.length ? `<div class="sec-title">Видалені</div>` + gone.map(a => `<div class="arow gone"><span class="art">${animalArt(a.id)}</span><b style="flex:1">${esc(a.n)}</b><button class="btn sm ghost" data-restore="${a.id}">Повернути</button></div>`).join("") : "");
 }
 async function zooPatch(id, patch) {
@@ -2570,8 +2584,8 @@ function fillAnimalEditor() {
     ${isNew ? `<p class="muted small" style="margin:12px 4px 0">Картинку, звук і голос назви можна буде додати одразу після збереження.</p>` : `
     <div class="sec-title">Картинка й звуки</div>
     <div class="form">
-      <div class="media-box"><div class="mh"><span>Картинка</span><span class="muted small">${img ? "своя" : a.custom ? "не додано" : "стандартна"}</span></div>
-        <div class="btn-row"><label class="btn sm" for="ae_img">${img ? "Замінити" : "Завантажити свою"}</label><input class="vh" type="file" accept="image/*" id="ae_img">${img ? `<button class="btn sm ghost" data-del="img">${a.custom ? "Прибрати" : "Повернути стандартну"}</button>` : ""}</div></div>
+      <div class="media-box"><div class="mh"><span>Картинка</span><span class="muted small">${img ? "своя" : animalPicId(a.id) ? "стандартна" : "не додано"}</span></div>
+        <div class="btn-row"><label class="btn sm" for="ae_img">${img ? "Замінити" : "Завантажити свою"}</label><input class="vh" type="file" accept="image/*" id="ae_img">${img ? `<button class="btn sm ghost" data-del="img">${animalPicId(a.id) ? "Повернути стандартну" : "Прибрати"}</button>` : ""}</div></div>
       ${box("snd", "Звук тваринки", snd, `Короткий запис до 8 с: mp3, m4a або wav.${a.q ? ` На Pixabay шукайте «${a.q}».` : ""}`)}
       ${box("voice", "Голос назви", vo, `Запишіть «${esc(nm)}» у «Диктофоні» й оберіть файл. Тишу на початку й у кінці застосунок обріже сам.`)}
     </div>
