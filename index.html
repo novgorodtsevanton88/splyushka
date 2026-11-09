@@ -795,6 +795,67 @@ html.dark .st-slide{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 .mk-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
 .mk-list .chip{ font-size:12px; padding:4px 10px; }
 .card-head .btn.sm{ white-space:nowrap; flex:none; }
+
+/* v1.4 «Личко» */
+.fc-title{ display:flex; align-items:center; gap:10px; }
+.fc-mini{ width:40px; height:40px; flex:none; }
+.fc-mini .face-svg{ width:100%; height:100%; display:block; }
+.fchips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.fchip{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:var(--line); font-size:14px; transition:transform .15s; }
+.fchip:active{ transform:scale(.95); }
+.fchip b{ font-weight:800; }
+.fchip .fl{ display:inline-flex; gap:1px; }
+.fchip .fl i{ font-style:normal; font-size:12px; opacity:.22; filter:grayscale(1); }
+.fchip .fl i.on{ opacity:1; filter:none; }
+.fchip.later{ opacity:.5; }
+#stage.face{ background:color-mix(in srgb,var(--accent) 16%,var(--bg)); gap:6px; justify-content:flex-start; padding-top:calc(env(safe-area-inset-top) + 16px); touch-action:manipulation; user-select:none; -webkit-user-select:none; }
+html.dark #stage.face{ background:color-mix(in srgb,var(--accent) 10%,var(--bg)); }
+#stage.face .f-top{ width:100%; display:flex; justify-content:center; padding:2px 56px 0; }
+#stage.face .f-top .seg{ width:min(240px,100%); }
+#stage.face .quiz-score{ position:absolute; top:calc(env(safe-area-inset-top) + 72px); left:20px; }
+.f-label{ min-height:52px; margin-top:auto; display:flex; align-items:center; justify-content:center; text-align:center; font-size:20px; }
+.f-label b{ font-size:36px; font-weight:800; letter-spacing:-.02em; }
+.f-label b.pop{ animation:pop .45s cubic-bezier(.3,1.6,.5,1); }
+.f-wrap{ position:relative; width:min(88vw,360px,48vh); aspect-ratio:1; margin-top:4px; }
+.f-wrap .face-svg{ width:100%; height:100%; display:block; overflow:visible; filter:drop-shadow(0 10px 14px rgba(120,70,60,.16)); }
+.f-wrap .burst{ top:auto; }
+.f-bar{ margin-top:auto; padding-top:14px !important; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px; padding:0 4px; }
+.f-bar .stage-note{ max-width:320px; }
+.f-lv{ flex-wrap:nowrap; gap:5px; }
+.f-lv .knbtn{ height:44px; padding:0 10px; gap:5px; font-size:13px; white-space:nowrap; }
+.f-lv .knbtn i{ font-size:14px; }
+.f-bar .st-row .pill-btn{ height:54px; padding:0 22px; }
+/* hit zones */
+.hz ellipse, .hz circle{ fill:transparent; stroke:transparent; stroke-width:3; cursor:pointer; transition:fill .25s, stroke .25s; }
+.hz.hl ellipse, .hz.hl circle{ fill:rgba(255,236,150,.38); stroke:#ffd36b; animation:hzPulse 1.1s ease-out; }
+.hz.ok ellipse, .hz.ok circle{ fill:rgba(140,230,170,.42); stroke:#5cc98f; animation:hzPulse 1s ease-out; }
+.hz.no ellipse, .hz.no circle{ fill:rgba(255,255,255,.35); stroke:rgba(255,255,255,.9); }
+.hz.hint ellipse, .hz.hint circle{ stroke:#ffd36b; stroke-dasharray:6 6; animation:hzHint 1.2s ease-in-out infinite; }
+@keyframes hzPulse{ 0%{ stroke-width:10; } 100%{ stroke-width:3; } }
+@keyframes hzHint{ 50%{ fill:rgba(255,236,150,.4); } }
+/* reactions */
+.face-svg g{ transform-box:fill-box; transform-origin:center; }
+.face-svg .f-mouth .op{ opacity:0; } .face-svg .f-mouth .sm{ transition:opacity .2s; }
+.face-svg.r-eyes .f-eye{ animation:fBlink .9s ease; }
+.face-svg.r-nose .f-nose{ animation:fBoop .6s cubic-bezier(.3,1.6,.5,1); }
+.face-svg.r-mouth .f-mouth .sm{ opacity:0; }
+.face-svg.r-mouth .f-mouth .op{ opacity:1; animation:fBoop .6s cubic-bezier(.3,1.6,.5,1); }
+.face-svg.r-ears .f-ear.l{ transform-origin:100% 50%; animation:fEarL .8s ease; }
+.face-svg.r-ears .f-ear.r{ transform-origin:0% 50%; animation:fEarR .8s ease; }
+.face-svg.r-cheeks .f-cheeks{ animation:fBlush 1s ease; }
+.face-svg.r-hair .f-hair{ transform-origin:50% 100%; animation:fHair .7s cubic-bezier(.3,1.6,.5,1); }
+.face-svg.r-brows .f-brows{ animation:fBrows .9s ease; }
+.face-svg.r-forehead, .face-svg.r-chin{ animation:fNod .7s ease; transform-origin:50% 90%; }
+@keyframes fBlink{ 0%,100%{ transform:none; } 20%,45%{ transform:scaleY(.1); } 60%{ transform:scaleY(1); } 75%{ transform:scaleY(.1); } }
+@keyframes fBoop{ 0%{ transform:scale(1); } 35%{ transform:scale(1.35,1.2); } 65%{ transform:scale(.92); } 100%{ transform:scale(1); } }
+@keyframes fEarL{ 25%{ transform:rotate(-14deg); } 55%{ transform:rotate(8deg); } 80%{ transform:rotate(-4deg); } }
+@keyframes fEarR{ 25%{ transform:rotate(14deg); } 55%{ transform:rotate(-8deg); } 80%{ transform:rotate(4deg); } }
+@keyframes fBlush{ 0%,100%{ opacity:.6; transform:scale(1); } 40%{ opacity:1; transform:scale(1.18); } }
+@keyframes fHair{ 30%{ transform:translateY(-8px) scaleY(1.05); } 60%{ transform:translateY(2px); } }
+@keyframes fBrows{ 25%,65%{ transform:translateY(-7px); } }
+@keyframes fNod{ 30%{ transform:rotate(-4deg); } 65%{ transform:rotate(3deg); } }
+.face-svg .f-cheeks{ opacity:.6; }
+@media (prefers-reduced-motion: reduce){ .face-svg *, .face-svg{ animation:none !important; } }
 </style>
 <div id="au"><form id="auf" class="h" autocomplete="on"><div class="ic" aria-hidden="true"></div><div class="t">Сплюшка</div><div class="s">Увійдіть у свій акаунт</div>
 <input id="aue" type="email" autocomplete="username" inputmode="email" placeholder="Пошта" aria-label="Пошта" autocapitalize="off">
@@ -1865,6 +1926,12 @@ const DEV_IDEAS = [
   { id: "i_water", c: "sense", t: "Гра з водою", d: "У ванні переливати з чашки в чашку, ловити іграшки, бризкати.", m: [9, 36] },
   { id: "i_drum", c: "sense", t: "Оркестр", d: "Каструля й дерев'яна ложка, коробочка з крупою: стукаємо тихо й голосно.", m: [9, 30] },
   { id: "i_nature", c: "sense", t: "Скарби з прогулянки", d: "Листочки, шишки, великі камінці: розглядати, торкатися й називати.", m: [12, 36] },
+  { id: "i_fmirror", c: "feel", t: "Личко в дзеркалі", d: "Сядьте разом перед дзеркалом: «Ось мамин носик, а ось твій!» Торкайтеся по черзі.", m: [12, 30] },
+  { id: "i_fwash", c: "sense", t: "Миємо личко", d: "Під час умивання називайте: «Миємо щічки, носик, вушка». Повільно й з паузами.", m: [10, 30] },
+  { id: "i_fbear", c: "think", t: "Де у ведмедика носик?", d: "Шукайте носик, очки й вушка в улюбленої іграшки, потім у себе й у мами.", m: [13, 30] },
+  { id: "i_fkiss", c: "feel", t: "Цьом у носик", d: "Цілуйте й називайте: «Цьом у щічку! Цьом у носик!» Потім хай малюк поцілує вас.", m: [9, 24] },
+  { id: "i_fhat", c: "talk", t: "Де вушка?", d: "Одягаючи шапку, ховайте вушка й знаходьте: «Де вушка? Ось вони!»", m: [12, 30] },
+  { id: "i_fsong", c: "sense", t: "Пісенька-показка", d: "На будь-яку мелодію співайте «Ось мій носик, ось мої очки…» і показуйте рукою малюка.", m: [12, 30] },
   { id: "i_song", c: "sense", t: "Потішка з рухами", d: "«Сорока-ворона», «Ладки»: та сама потішка багато разів поспіль.", m: [6, 30] },
 ];
 const DEV_ALL = DEV_BASICS.concat(DEV_IDEAS);
@@ -2013,6 +2080,7 @@ function renderDev() {
     ${skillsCard()}
     ${wordsCard()}
     ${speechCard()}
+    ${faceCard()}
     <div class="card glass">
       <div class="card-head"><h2>Як каже тваринка?</h2><button class="btn sm ghost" data-act="animals">Налаштувати</button></div>
       ${togetherCard()}
@@ -2214,6 +2282,7 @@ async function knownSet(t, id, v) {
   try { await store.setKnown(knownKey(t, id), nv ? { v: nv, at: Date.now() } : null); } catch (e) { }
 }
 function stageKnownRefresh() {
+  faceKnownRefresh();
   const el = $("#stage.pager"); if (!el) return; const a = stageList[stageIdx]; if (!a) return;
   const v = knownVal("a", a.id);
   $$("[data-stage=knows]", el).forEach(b => b.classList.toggle("on", v === "knows"));
@@ -2885,7 +2954,7 @@ function openProfile() {
     </div>
 
     <button type="button" class="signout" onclick="window.__signOut&&window.__signOut()">Вийти з акаунта</button>
-    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.2 · безкоштовно і без реклами</div>
+    <div class="disclaimer" style="margin-top:10px">Сплюшка · v1.4 · безкоштовно і без реклами</div>
   `, sh => {
     let gender = c.gender || "";
     initSeg($("#pfGender", sh), v => gender = v);
@@ -3015,6 +3084,7 @@ document.addEventListener("click", async e => {
   if (act === "profile") openProfile();
   else if (act === "theme") switchTheme(isDark() ? "light" : "dark");
   else if (act === "animals") openAnimalsList();
+  else if (act === "face") openFace();
   else if (act === "quiz") openQuiz(+(settings.animalMode || 2));
   else if (act === "skills") openSkills();
   else if (act === "word-add") openWords(true);
@@ -3394,6 +3464,177 @@ function openLullEdit(id) {
 }
 refreshLullFiles();
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { if (Sound.curId || Lull.curId) Sound.updateWake(); renderHome(); } });
+
+
+/* ============ v1.4: «Личко» — частини обличчя ============ */
+const FACE = [
+  { id: "nose", n: "Носик", q: "Де носик?", m: 12, re: /^н[оі]с/ },
+  { id: "eyes", n: "Очки", q: "Де очки?", m: 12, re: /^оч|^око/ },
+  { id: "mouth", n: "Ротик", q: "Де ротик?", m: 12, re: /^рот/ },
+  { id: "ears", n: "Вушка", q: "Де вушка?", m: 12, re: /^ву[хш]/ },
+  { id: "hair", n: "Волосики", q: "Де волосики?", m: 14, re: /^волос/ },
+  { id: "cheeks", n: "Щічки", q: "Де щічки?", m: 15, re: /^щ[іо][чк]/ },
+  { id: "brows", n: "Бровки", q: "Де бровки?", m: 18, re: /^бров/ },
+  { id: "forehead", n: "Лобик", q: "Де лобик?", m: 18, re: /^лоб/ },
+  { id: "chin", n: "Підборіддя", q: "Де підборіддя?", m: 24, re: /^підбор/ },
+];
+const FACE_LV = [["self", "👆", "На собі"], ["pic", "🖼", "На малюнку"], ["says", "🗣", "Каже"]];
+const faceGet = id => FACE.find(p => p.id === id);
+const faceNow = () => { const m = devAge(); return FACE.filter(p => p.m <= m + 2); };
+const faceRec = id => (state.known || {})["b_" + id] || {};
+function faceSaysAuto(p) { return Object.values(state.words || {}).some(w => w && w.w && p.re.test(String(w.w).trim().toLowerCase())); }
+function faceLv(p, lv) { const r = faceRec(p.id); return lv === "says" ? !!r.says || faceSaysAuto(p) : !!r[lv]; }
+async function faceSetLv(id, lv) {
+  if (!state.canWrite) { toast("Немає права змінювати записи."); return; }
+  const p = faceGet(id), r = Object.assign({}, faceRec(id));
+  if (lv === "says" && !r.says && faceSaysAuto(p)) { toast("Це слово вже є у «Словах малюка»"); return; }
+  if (r[lv]) delete r[lv]; else r[lv] = Date.now();
+  const any = FACE_LV.some(([k]) => r[k]);
+  try { await store.setKnown("b_" + id, any ? { v: "knows", self: r.self || 0, pic: r.pic || 0, says: r.says || 0, at: Date.now() } : null); } catch (e) { }
+}
+
+function faceSvg(zones) {
+  const z = (part, shapes) => zones ? `<g class="hz" data-fp="${part}">${shapes}</g>` : "";
+  return `<svg class="face-svg" viewBox="0 0 300 300" aria-hidden="true">
+  <g class="f-ear l"><circle cx="50" cy="168" r="23" fill="#ffd2b8"/><circle cx="52" cy="168" r="11" fill="#f3b39a"/></g>
+  <g class="f-ear r"><circle cx="250" cy="168" r="23" fill="#ffd2b8"/><circle cx="248" cy="168" r="11" fill="#f3b39a"/></g>
+  <ellipse cx="150" cy="166" rx="102" ry="108" fill="#ffdcc6"/>
+  <ellipse cx="150" cy="190" rx="86" ry="80" fill="#ffe5d3" opacity=".7"/>
+  <g class="f-hair"><path d="M56 146C50 82 98 50 150 50s100 32 94 96c-14-36-50-52-94-50-44-2-80 14-94 50z" fill="#a8745a"/>
+    <path d="M150 54c-14-22 6-36 20-24 8 7 2 18-8 14" fill="none" stroke="#a8745a" stroke-width="9" stroke-linecap="round"/>
+    <path d="M92 78c16-12 36-17 58-17" fill="none" stroke="#c99478" stroke-width="5" stroke-linecap="round" opacity=".7"/></g>
+  <g class="f-brows" fill="none" stroke="#a8745a" stroke-width="5" stroke-linecap="round"><path d="M98 131q14-9 28-1"/><path d="M174 130q14-8 28 1"/></g>
+  <g class="f-eyes"><g class="f-eye"><ellipse cx="112" cy="160" rx="13" ry="16" fill="#3a2e3f"/><circle cx="117" cy="154" r="4.6" fill="#fff"/><circle cx="108" cy="166" r="2" fill="#fff" opacity=".8"/></g>
+    <g class="f-eye"><ellipse cx="188" cy="160" rx="13" ry="16" fill="#3a2e3f"/><circle cx="193" cy="154" r="4.6" fill="#fff"/><circle cx="184" cy="166" r="2" fill="#fff" opacity=".8"/></g></g>
+  <g class="f-cheeks"><ellipse cx="88" cy="202" rx="21" ry="13" fill="#ff9fb2"/><ellipse cx="212" cy="202" rx="21" ry="13" fill="#ff9fb2"/></g>
+  <g class="f-nose"><ellipse cx="150" cy="189" rx="12" ry="9" fill="#f6b498"/><circle cx="146" cy="186" r="3" fill="#fff" opacity=".6"/></g>
+  <g class="f-mouth"><path class="sm" d="M130 224q20 19 40 0" fill="none" stroke="#c9606f" stroke-width="5" stroke-linecap="round"/>
+    <path class="op" d="M131 221q19 30 38 0q-19 6-38 0z" fill="#c9606f"/></g>
+  <g class="f-chin"><path d="M136 258q14 6 28 0" fill="none" stroke="#f1bfa6" stroke-width="3" stroke-linecap="round"/></g>
+  ${zones ? `<g class="hzs">
+    ${z("hair", `<ellipse cx="150" cy="72" rx="100" ry="34"/><circle cx="160" cy="36" r="20"/>`)}
+    ${z("ears", `<ellipse cx="44" cy="166" rx="28" ry="28"/><ellipse cx="256" cy="166" rx="28" ry="28"/>`)}
+    ${z("forehead", `<ellipse cx="150" cy="109" rx="56" ry="15"/>`)}
+    ${z("chin", `<ellipse cx="150" cy="259" rx="40" ry="14"/>`)}
+    ${z("cheeks", `<ellipse cx="86" cy="204" rx="27" ry="20"/><ellipse cx="214" cy="204" rx="27" ry="20"/>`)}
+    ${z("brows", `<ellipse cx="112" cy="128" rx="24" ry="10"/><ellipse cx="188" cy="128" rx="24" ry="10"/>`)}
+    ${z("eyes", `<ellipse cx="112" cy="160" rx="23" ry="21"/><ellipse cx="188" cy="160" rx="23" ry="21"/>`)}
+    ${z("nose", `<ellipse cx="150" cy="190" rx="21" ry="17"/>`)}
+    ${z("mouth", `<ellipse cx="150" cy="229" rx="31" ry="16"/>`)}
+  </g>` : ""}
+</svg>`;
+}
+
+function faceCard() {
+  const now = faceNow(), later = FACE.filter(p => !now.includes(p));
+  const shows = now.filter(p => faceLv(p, "self") || faceLv(p, "pic")).length, says = now.filter(p => faceLv(p, "says")).length;
+  const chip = (p, dim) => `<button class="fchip ${dim ? "later" : ""}" data-face="${p.id}"><b>${esc(p.n)}</b><span class="fl">${FACE_LV.map(([k, e]) => `<i class="${faceLv(p, k) ? "on" : ""}">${e}</i>`).join("")}</span></button>`;
+  return `<div class="card glass">
+    <div class="card-head"><div class="fc-title"><span class="fc-mini">${faceSvg(false)}</span><h2>Личко</h2></div><button class="btn sm" data-act="face">▶ Грати</button></div>
+    <p class="muted small" style="margin:10px 2px 0">Найкраще працює гра на собі: «Де в мами носик? А де твій?» Екран лише закріплює те, що вже грали.</p>
+    <div class="fchips">${now.map(p => chip(p)).join("")}${later.map(p => chip(p, true)).join("")}</div>
+    <div class="kn-sum muted small">${shows || says ? `Показує ${shows} з ${now.length}${says ? ` · називає ${says}` : ""}.` : "Позначки: 👆 показує на собі, 🖼 на малюнку, 🗣 каже слово."}${later.length ? " Бліді слова — на потім." : ""}</div>
+  </div>`;
+}
+
+/* ---- face stage: listen / show me ---- */
+const Face = { mode: "listen", sel: null, target: null, last: null, score: 0, miss: 0, busy: false };
+const faceQuiet = () => (settings.say || "both") === "none" || !settings.tts;
+function faceSay(t) { if (faceQuiet()) return Promise.resolve(false); stopClip(); Sound.ensure(); return speak(t); }
+function openFace(sel) {
+  closeStage(true); Object.assign(Face, { mode: sel ? "listen" : (settings.faceMode || "listen"), sel: sel || null, target: null, last: null, score: 0, miss: 0, busy: false });
+  const el = document.createElement("div"); el.id = "stage"; el.className = "face";
+  el.innerHTML = `<button class="icon-btn glass stage-close" data-f="close" aria-label="Закрити">${ICON.close}</button>
+    <div class="f-top"><div class="seg" id="faceSeg"><span class="pill"></span><button data-v="listen" class="${Face.mode === "listen" ? "on" : ""}">Слухати</button><button data-v="show" class="${Face.mode === "show" ? "on" : ""}">Покажи</button></div></div>
+    <div class="quiz-score" id="fScore"></div>
+    <div class="f-label" id="fLabel"></div>
+    <div class="f-wrap" id="fWrap">${faceSvg(true)}</div>
+    <div class="f-bar" id="fBar"></div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  initSeg($("#faceSeg", el), v => { settings.faceMode = v; LS.set("settings", settings); Face.mode = v; Face.score = 0; Face.sel = null; stopClip(); faceRender(); });
+  $("#fWrap", el).addEventListener("pointerdown", e => {
+    const g = e.target.closest("[data-fp]"); if (!g) return;
+    e.preventDefault(); facePoke(g.dataset.fp, e);
+  });
+  el.addEventListener("click", e => {
+    const b = e.target.closest("[data-f]"); if (!b) return; const k = b.dataset.f;
+    if (k === "close") closeStage(); else if (k === "again") { if (Face.target) faceSay(Face.target.q); } else if (k === "next") faceRound();
+    else if (k === "lv") faceSetLv(b.dataset.id, b.dataset.lv);
+  });
+  faceRender();
+  if (Face.sel) setTimeout(() => { if ($("#stage.face")) facePoke(Face.sel); }, 350);
+}
+function faceRender() {
+  const el = $("#stage.face"); if (!el) return;
+  el.classList.toggle("show-mode", Face.mode === "show");
+  $$(".hz", el).forEach(g => g.classList.remove("hl", "hint", "ok", "no"));
+  if (Face.mode === "show") { faceRound(); return; }
+  $("#fScore").textContent = "";
+  $("#fLabel").innerHTML = Face.sel ? `<b>${esc(faceGet(Face.sel).n)}</b>` : `<span class="muted">Торкніться личка</span>`;
+  faceBar();
+}
+function faceBar() {
+  const bar = $("#fBar"); if (!bar) return;
+  if (Face.mode === "show") {
+    bar.innerHTML = `<div class="st-row"><button class="pill-btn glass" data-f="again"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>Ще раз</button><button class="pill-btn glass" data-f="next">Інше ›</button></div>
+      <div class="stage-note" id="stageNote">${faceQuiet() ? "Спитайте малюка самі: «Де носик?»" : ""}</div>`;
+    return;
+  }
+  const p = Face.sel && faceGet(Face.sel);
+  bar.innerHTML = p ? `<div class="stage-note">Що вже вміє?</div><div class="st-row kn f-lv">${FACE_LV.map(([k, e, t]) => `<button class="knbtn glass ${faceLv(p, k) ? "on" : ""}" data-f="lv" data-id="${p.id}" data-lv="${k}"><i>${e}</i>${t}</button>`).join("")}</div>`
+    : `<div class="stage-note">Торкайтеся разом і повторюйте назву вголос. Потім покажіть те саме на собі.</div>`;
+}
+function faceKnownRefresh() { if ($("#stage.face") && Face.mode === "listen") faceBar(); }
+function faceReact(id) {
+  const svg = $("#stage.face .face-svg"); if (!svg) return;
+  const c = "r-" + id; svg.classList.remove(c); void svg.getBoundingClientRect(); svg.classList.add(c);
+  clearTimeout(faceReact["t" + id]); faceReact["t" + id] = setTimeout(() => svg.classList.remove(c), 1100);
+}
+function faceGlow(id, cls, ms = 1000) {
+  const g = $(`#stage.face [data-fp="${id}"]`); if (!g) return;
+  g.classList.remove(cls); void g.getBoundingClientRect(); g.classList.add(cls);
+  if (ms) setTimeout(() => g.classList.remove(cls), ms);
+}
+function faceBurst(e) {
+  const w = $("#fWrap"); if (!w) return; const r = w.getBoundingClientRect();
+  const x = e && e.clientX ? e.clientX - r.left : r.width / 2, y = e && e.clientY ? e.clientY - r.top : r.height / 2;
+  const b = document.createElement("span"); b.className = "burst"; b.style.left = x + "px"; b.style.top = y + "px"; b.innerHTML = "<i></i>".repeat(8);
+  w.appendChild(b); setTimeout(() => b.remove(), 900);
+}
+function facePoke(id, e) {
+  const p = faceGet(id); if (!p) return;
+  try { navigator.vibrate && navigator.vibrate(12); } catch (_) { }
+  if (Face.mode === "listen") {
+    Face.sel = id; faceReact(id); faceGlow(id, "hl", 1200);
+    $("#fLabel").innerHTML = `<b class="pop">${esc(p.n)}</b>`; faceBar(); faceSay(p.n);
+    return;
+  }
+  const t = Face.target; if (!t || Face.busy) return;
+  if (id === t.id) {
+    Face.busy = true; Face.score++; faceReact(id); faceGlow(id, "ok", 1400); faceBurst(e);
+    const sc = $("#fScore"); sc.textContent = `⭐ ${Face.score}`; sc.classList.remove("bump"); void sc.offsetWidth; sc.classList.add("bump");
+    $("#fLabel").innerHTML = `<b class="pop">Так! ${esc(p.n)}!</b>`;
+    try { navigator.vibrate && navigator.vibrate(30); } catch (_) { }
+    const tgt = t; faceSay(`Так! ${p.n}!`).then(() => wait(700)).then(() => { if ($("#stage.face") && Face.target === tgt && Face.mode === "show") faceRound(); });
+  } else {
+    Face.miss++; faceGlow(id, "no", 900);
+    const note = $("#stageNote"); if (note) note.textContent = `Це ${p.n.toLowerCase()}. А де ${t.n.toLowerCase()}?`;
+    if (Face.miss >= 2) { faceGlow(t.id, "hint", 0); faceReact(t.id); }
+    faceSay(`Це ${p.n.toLowerCase()}. ${t.q}`);
+  }
+}
+function faceRound() {
+  const el = $("#stage.face"); if (!el || Face.mode !== "show") return;
+  const pool = faceNow().filter(p => p.id !== Face.last), t = pool[Math.floor(Math.random() * pool.length)];
+  Object.assign(Face, { target: t, last: t.id, miss: 0, busy: false });
+  $$(".hz", el).forEach(g => g.classList.remove("hl", "hint", "ok", "no"));
+  $("#fScore").textContent = Face.score ? `⭐ ${Face.score}` : "";
+  $("#fLabel").innerHTML = `<b class="pop">${esc(t.q)}</b>`;
+  faceBar();
+  setTimeout(() => { if ($("#stage.face") && Face.target === t) faceSay(t.q); }, 300);
+}
+document.addEventListener("click", e => { const c = e.target.closest("[data-face]"); if (c) openFace(c.dataset.face); });
 
 /* ============ boot ============ */
 applySettings();
