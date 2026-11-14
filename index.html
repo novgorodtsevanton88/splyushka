@@ -796,6 +796,26 @@ html.dark .st-slide{ background:color-mix(in srgb,var(--abg) 18%,var(--bg)); }
 .mk-list .chip{ font-size:12px; padding:4px 10px; }
 .card-head .btn.sm{ white-space:nowrap; flex:none; }
 
+/* v1.5 «Малюк сам» — дитячий режим тваринок */
+#stage.kid{ touch-action:none; -webkit-touch-callout:none; }
+#stage.kid .st-slide{ padding:calc(env(safe-area-inset-top) + 40px) 20px calc(env(safe-area-inset-bottom) + 130px); gap:14px; cursor:pointer; }
+#stage.kid .stage-art{ width:min(80vw,360px); pointer-events:none; }
+#stage.kid .stage-says, #stage.kid .stage-note{ display:none; }
+#stage.kid .stage-name{ font-size:44px; pointer-events:none; }
+#stage.kid .st-arrow{ top:auto; margin:0; bottom:calc(env(safe-area-inset-bottom) + 26px); width:84px; height:84px; border-radius:50%; }
+#stage.kid .st-arrow.l{ left:22px; } #stage.kid .st-arrow.r{ right:22px; }
+#stage.kid .st-arrow svg{ width:40px; height:40px; stroke-width:3; }
+#stage.kid .st-arrow:active{ transform:scale(.92); }
+.kid-lock{ position:absolute; z-index:4; top:calc(env(safe-area-inset-top) + 12px); right:12px; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; opacity:.45; transition:opacity .2s; }
+.kid-lock.hold{ opacity:1; }
+.kid-lock svg.lk{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.kid-lock svg.ring{ position:absolute; inset:-3px; width:46px; height:46px; transform:rotate(-90deg); fill:none; stroke:var(--accent-strong, var(--accent)); stroke-width:3.5; stroke-linecap:round; stroke-dasharray:126; stroke-dashoffset:126; }
+.kid-lock.hold svg.ring{ stroke-dashoffset:0; transition:stroke-dashoffset 3s linear; }
+.kid-hint{ position:absolute; z-index:4; top:calc(env(safe-area-inset-top) + 18px); right:62px; padding:6px 12px; border-radius:999px; font-size:13px; font-weight:800; opacity:0; transition:opacity .3s; pointer-events:none; }
+.kid-hint.show{ opacity:1; }
+body.kid #toast, body.kid #bk-bar, body.kid #tg-chip button{ display:none !important; }
+.kid-go{ width:100%; margin-top:12px; }
+
 /* v1.4 «Личко» */
 .fc-title{ display:flex; align-items:center; gap:10px; }
 .fc-mini{ width:40px; height:40px; flex:none; }
@@ -2088,6 +2108,7 @@ function renderDev() {
       <div class="seg" id="anMode"><span class="pill"></span>${MODE_OPTS.map(([k, t]) => `<button data-v="${k}" class="${mode === k ? "on" : ""}">${t}</button>`).join("")}</div>
       <p class="muted small" id="anModeHint" style="margin:10px 2px 0">${MODE_HINT[mode]}</p>
       <button class="btn quiz-go ${mode === "listen" ? "hidden" : ""}" id="quizGo" data-act="quiz">▶ Грати: хто так каже?</button>
+      ${list.length ? `<button class="btn ghost kid-go" data-act="kid">🔒 Малюк сам: лише тваринки</button>` : ""}
       <div class="agrid">${list.map(a => `<button class="acard" style="--abg:${a.bg}" data-animal="${a.id}">${knownBadge(a.id)}<span class="art">${animalArt(a.id)}</span>${esc(a.n)}</button>`).join("")}</div>
       ${ageM != null && ageM < 18 ? `<p class="muted small" style="margin:12px 2px 0">До півтора року лікарі радять екран лише разом із дорослим і ненадовго: кілька хвилин гри, а далі повторюйте звуки без телефона.</p>` : ""}
     </div>
@@ -2439,13 +2460,14 @@ async function runSay(a, what) {
 
 /* ---------- animal stage (listen): pager with draggable slides ---------- */
 let stageList = [], stageIdx = 0, stageBusy = false;
-function openStage(id) {
+function openStage(id, kid) {
   closeStage(true); stageList = zooList(); if (!stageList.length) return;
   const i = stageList.findIndex(a => a.id === id); stageIdx = i < 0 ? 0 : i; stageBusy = false;
-  const el = document.createElement("div"); el.id = "stage"; el.className = "pager";
-  const many = stageList.length > 1, say = settings.say || "both";
+  const el = document.createElement("div"); el.id = "stage"; el.className = "pager" + (kid ? " kid" : "");
+  const many = stageList.length > 1, say = kid ? "sound" : settings.say || "both";
   el.innerHTML = `<div class="st-track" id="stTrack"></div>
-    <button class="icon-btn glass stage-close" data-stage="close" aria-label="Закрити">${ICON.close}</button>
+    ${kid ? `<button class="glass kid-lock" aria-label="Утримуйте, щоб вийти"><svg class="ring" viewBox="0 0 46 46"><circle cx="23" cy="23" r="20"/></svg><svg class="lk" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button><div class="kid-hint glass">Утримуйте 3 с, щоб вийти</div>`
+    : `<button class="icon-btn glass stage-close" data-stage="close" aria-label="Закрити">${ICON.close}</button>`}
     ${many ? `<button class="icon-btn glass st-arrow l" data-stage="prev" aria-label="Попередня"><svg viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
     <button class="icon-btn glass st-arrow r" data-stage="next" aria-label="Наступна"><svg viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>` : ""}
     <div class="st-bar">
@@ -2453,11 +2475,13 @@ function openStage(id) {
       <button class="pill-btn glass" data-stage="sound" aria-label="Звук"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>Звук</button></div>
       <div class="st-row kn"><button class="knbtn glass" data-stage="knows"><i>✓</i>Знає</button><button class="knbtn glass" data-stage="learns"><i>🌱</i>Ще не знає</button></div>
     </div>`;
+  if (kid) { const b = $(".st-bar", el); b && b.remove(); }
   document.body.appendChild(el);
   stageBuild(true); stageKnownRefresh();
   requestAnimationFrame(() => el.classList.add("show"));
   el.addEventListener("click", e => {
     if (stageDrag.moved) { stageDrag.moved = false; return; }
+    if (kid) { const b = e.target.closest("[data-stage]"), k = b && b.dataset.stage; if (k === "prev") stageGo(-1); else if (k === "next") stageGo(1); else if (e.target.closest(".st-slide.cur")) runSay(stageList[stageIdx], "sound"); return; }
     const b = e.target.closest("[data-stage]"); if (!b) return; const k = b.dataset.stage, a = stageList[stageIdx];
     if (k === "close") closeStage(); else if (k === "prev") stageGo(-1); else if (k === "next") stageGo(1);
     else if (k === "name") runSay(a, "name"); else if (k === "sound") runSay(a, "sound");
@@ -2465,6 +2489,7 @@ function openStage(id) {
     else runSay(a, (settings.say || "both") === "none" ? "sound" : settings.say || "both");
   });
   stageBindDrag(el);
+  if (kid) kidStart(el);
   if (say !== "none") runSay(stageList[stageIdx], say);
 }
 function stageSlide(a, cur, pop) {
@@ -2500,7 +2525,7 @@ function stageSettle(dir) {
       const note = $(".stage-note", kids[1]); if (note) note.id = "stageNote";
       tr.style.transition = "none"; tr.style.transform = "translate3d(0,0,0)";
       stageKnownRefresh();
-      const say = settings.say || "both"; if (say !== "none") runSay(stageList[stageIdx], say);
+      const say = $("#stage.kid") ? "sound" : settings.say || "both"; if (say !== "none") runSay(stageList[stageIdx], say);
     }
     stageBusy = false;
   };
@@ -2510,7 +2535,7 @@ function stageGo(dir) { if (stageBusy || stageList.length < 2) return; stopClip(
 function stageBindDrag(el) {
   let d = null;
   el.addEventListener("pointerdown", e => {
-    if (stageBusy || stageList.length < 2 || e.button > 0 || e.target.closest(".st-bar,.stage-close,.st-arrow")) return;
+    if (stageBusy || stageList.length < 2 || e.button > 0 || e.target.closest(".st-bar,.stage-close,.st-arrow,.kid-lock")) return;
     const tr = $("#stTrack"); d = { id: e.pointerId, x0: e.clientX, y0: e.clientY, on: false, W: tr.clientWidth, hist: [], dx: 0 }; stageDrag.moved = false;
   });
   el.addEventListener("pointermove", e => {
@@ -2530,8 +2555,45 @@ function stageBindDrag(el) {
   };
   el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
 }
-function closeStage(instant) { stopClip(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId && !Lull.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
+function closeStage(instant) { stopClip(); kidStop(); const el = $("#stage"); if (!el) return; if (instant) { el.remove(); return; } el.classList.remove("show"); setTimeout(() => el.remove(), 300); if (!Sound.curId && !Lull.curId) try { Sound.html && Sound.html.pause(); } catch (e) { } }
 document.addEventListener("click", e => { const c = e.target.closest("[data-animal]"); if (c) openStage(c.dataset.animal); });
+
+/* ---------- «Малюк сам»: lock-down animal pager ---------- */
+const Kid = { on: false, wl: null, t: 0, ht: 0 };
+function openKid() {
+  const list = zooList(); if (!list.length) return;
+  Sound.ensure(); Sound.unlockHtml();
+  try { const d = document.documentElement, f = d.requestFullscreen || d.webkitRequestFullscreen; f && Promise.resolve(f.call(d, { navigationUI: "hide" })).catch(() => { }); } catch (e) { }
+  openStage(list[0].id, true);
+}
+function kidPop() { if (Kid.on) try { history.pushState({ kid: 1 }, ""); } catch (e) { } }
+function kidVis() { if (Kid.on && !document.hidden) kidWake(); }
+async function kidWake() { try { if (navigator.wakeLock && !Kid.wl) { Kid.wl = await navigator.wakeLock.request("screen"); Kid.wl.addEventListener("release", () => { Kid.wl = null; }); } } catch (e) { } }
+const kidBlock = e => e.preventDefault();
+function kidStart(el) {
+  Kid.on = true; document.body.classList.add("kid");
+  try { history.pushState({ kid: 1 }, ""); } catch (e) { }
+  window.addEventListener("popstate", kidPop); document.addEventListener("visibilitychange", kidVis);
+  el.addEventListener("contextmenu", kidBlock); el.addEventListener("gesturestart", kidBlock); el.addEventListener("dblclick", kidBlock);
+  kidWake();
+  const lock = $(".kid-lock", el), hint = $(".kid-hint", el); let pid = null;
+  const cancel = () => { clearTimeout(Kid.t); pid = null; lock.classList.remove("hold"); };
+  lock.addEventListener("pointerdown", e => {
+    e.stopPropagation(); if (pid != null) return; pid = e.pointerId; try { lock.setPointerCapture(pid); } catch (_) { }
+    lock.classList.add("hold"); hint.classList.add("show"); clearTimeout(Kid.ht); Kid.ht = setTimeout(() => hint.classList.remove("show"), 3600);
+    Kid.t = setTimeout(() => { cancel(); closeStage(); }, 3000);
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => lock.addEventListener(t, e => { if (e.pointerId === pid) cancel(); }));
+  lock.addEventListener("click", e => e.stopPropagation());
+}
+function kidStop() {
+  if (!Kid.on) return; Kid.on = false; clearTimeout(Kid.t); clearTimeout(Kid.ht);
+  document.body.classList.remove("kid");
+  window.removeEventListener("popstate", kidPop); document.removeEventListener("visibilitychange", kidVis);
+  try { Kid.wl && Kid.wl.release(); } catch (e) { } Kid.wl = null;
+  try { if (history.state && history.state.kid) history.back(); } catch (e) { }
+  try { const x = document.exitFullscreen || document.webkitExitFullscreen; if (document.fullscreenElement || document.webkitFullscreenElement) x && Promise.resolve(x.call(document)).catch(() => { }); } catch (e) { }
+}
 
 /* ---------- animal quiz: one of two / one of three ---------- */
 const Quiz = { k: 2, target: null, score: 0, last: null, busy: false };
@@ -3053,7 +3115,7 @@ function bkCheck() {
   if (!settings.backupRemind || document.hidden || !state.loaded || !state.child) return;
   const now = Date.now();
   if (now - (settings.lastBackup || 0) < BK_WEEK || now < (settings.backupSnooze || 0)) return;
-  if ($("#sheet-root .sheet") || Together.end) return;
+  if ($("#sheet-root .sheet") || Together.end || $("#stage")) return;
   const b = $("#bk-bar"); if (b.classList.contains("show")) return;
   const days = Math.floor((now - settings.lastBackup) / 86400000);
   $("#bk-t").textContent = "Минуло " + days + " дн. без резервної копії. Збережіть її, щоб не втратити записи.";
@@ -3085,6 +3147,7 @@ document.addEventListener("click", async e => {
   else if (act === "theme") switchTheme(isDark() ? "light" : "dark");
   else if (act === "animals") openAnimalsList();
   else if (act === "face") openFace();
+  else if (act === "kid") openKid();
   else if (act === "quiz") openQuiz(+(settings.animalMode || 2));
   else if (act === "skills") openSkills();
   else if (act === "word-add") openWords(true);

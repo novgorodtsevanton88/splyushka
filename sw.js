@@ -1,5 +1,5 @@
 // Сплюшка: офлайн-кеш. Версія: 3
-var C='sp-7';
+var C='sp-8';
 var CORE=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'].concat(["cow", "dog", "cat", "pig", "hen", "rooster", "horse", "sheep", "duck", "goat", "frog", "bird", "donkey", "tiger", "lion", "squirrel", "chick", "wolf", "bunny", "hedgehog", "hamster"].map(function(a){return './img/animals/'+a+'.webp'}));
 var LIB='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 self.addEventListener('install',function(e){
